@@ -19,6 +19,52 @@ class User(UserBase):
     role: str
     created_at: datetime
     last_login_at: Optional[datetime]
+    github_username: Optional[str] = None
+    
+    class Config:
+        from_attributes = True
+
+# Activity schemas
+class ActivityBase(BaseModel):
+    activity_type: str
+    title: str
+    description: Optional[str] = None
+    url: Optional[str] = None
+    author: Optional[str] = None
+    timestamp: datetime
+
+class Activity(ActivityBase):
+    id: int
+    project_id: int
+    repository_id: Optional[int] = None
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+# Repository schemas
+class RepositoryBase(BaseModel):
+    name: str
+    full_name: str
+    url: Optional[str] = None
+    description: Optional[str] = None
+    language: Optional[str] = None
+    stars: int = 0
+    forks: int = 0
+    open_issues: int = 0
+
+class RepositoryCreate(BaseModel):
+    full_name: str  # e.g., "jmcconocha/organizeMe"
+    project_id: int
+
+class Repository(RepositoryBase):
+    id: int
+    project_id: int
+    github_id: str
+    last_synced: Optional[datetime] = None
+    created_at: datetime
+    updated_at: datetime
+    activities: List[Activity] = []
     
     class Config:
         from_attributes = True
@@ -47,6 +93,7 @@ class Project(ProjectBase):
     visibility: str
     created_at: datetime
     updated_at: datetime
+    repositories: List[Repository] = []
     
     class Config:
         from_attributes = True

@@ -4,13 +4,14 @@ from app.database import engine, Base
 from app.routes_auth import router as auth_router
 from app.routes_projects import router as projects_router
 from app.routes_notes import router as notes_router
+from app.routes_repositories import router as repositories_router
 import os
 import sqlite3
 
 # Create tables
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Project Portfolio Manager API", version="0.1.0")
+app = FastAPI(title="Project Portfolio Manager API", version="0.2.0")
 
 # CORS
 origins = os.getenv("CORS_ORIGIN", "http://localhost:5173").split(",")
@@ -26,6 +27,7 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(projects_router)
 app.include_router(notes_router)
+app.include_router(repositories_router)
 
 # Health check endpoints
 @app.get("/healthz")
