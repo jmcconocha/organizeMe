@@ -7,7 +7,7 @@ from app.models import Repository, Project, User, Activity
 from app.schemas import Repository as RepositorySchema, RepositoryCreate, Activity as ActivitySchema
 from app.dependencies import get_current_user
 from app.github_client import GitHubClient, parse_repo_full_name
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List
 
 router = APIRouter(prefix="/api/repositories", tags=["repositories"])
