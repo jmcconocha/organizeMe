@@ -4,6 +4,7 @@ import ProjectForm from '../components/ProjectForm'
 import FolderScanner from '../components/FolderScanner'
 import KanbanBoard from '../components/KanbanBoard'
 import ProjectDetail from '../components/ProjectDetail'
+import AiSettingsModal from '../components/AiSettingsModal'
 import '../styles/ProjectsPage.css'
 
 function ProjectsPage() {
@@ -11,6 +12,7 @@ function ProjectsPage() {
   const [refresh, setRefresh] = useState(0)
   const [activeView, setActiveView] = useState('list') // 'list', 'kanban', 'scanner'
   const [selectedProjectId, setSelectedProjectId] = useState(null)
+  const [showAiModal, setShowAiModal] = useState(false)
 
   const handleProjectCreated = () => {
     setShowForm(false)
@@ -56,6 +58,9 @@ function ProjectsPage() {
               {showForm ? 'Cancel' : 'New Project'}
             </button>
           )}
+          <button className="btn-secondary" onClick={() => setShowAiModal(true)}>
+            AI Settings
+          </button>
         </div>
       </header>
 
@@ -91,6 +96,10 @@ function ProjectsPage() {
             projectId={selectedProjectId}
             onClose={() => setSelectedProjectId(null)}
           />
+        )}
+
+        {showAiModal && (
+          <AiSettingsModal onClose={() => setShowAiModal(false)} />
         )}
       </main>
     </div>

@@ -6,6 +6,7 @@ from app.routes_notes import router as notes_router
 from app.routes_repositories import router as repositories_router
 from app.routes_scanner import router as scanner_router
 from app.routes_kanban import router as kanban_router
+from app.routes_admin import router as admin_router
 from app.scheduler import start_scheduler, stop_scheduler
 import os
 import sqlite3
@@ -31,6 +32,7 @@ app.include_router(notes_router)
 app.include_router(repositories_router)
 app.include_router(scanner_router)
 app.include_router(kanban_router)
+app.include_router(admin_router)
 
 
 @app.on_event("startup")

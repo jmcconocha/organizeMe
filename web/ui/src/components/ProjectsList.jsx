@@ -9,12 +9,19 @@ function ProjectsList({ refresh, onRefresh, onNewProject }) {
   const [editingId, setEditingId] = useState(null)
   const [editForm, setEditForm] = useState({})
   const [selectedProjectId, setSelectedProjectId] = useState(null)
+  const [summaries, setSummaries] = useState({})
 
   const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
   useEffect(() => {
     fetchProjects()
   }, [refresh])
+
+  useEffect(() => {
+    if (projects.length > 0) {
+      fetchSummaries(projects)
+    }
+  }, [projects])
 
   const fetchProjects = async () => {
     setLoading(true)
@@ -47,6 +54,27 @@ function ProjectsList({ refresh, onRefresh, onNewProject }) {
   const handleEdit = (project) => {
     setEditingId(project.id)
     setEditForm(project)
+  }
+
+  const fetchSummaries = async (projectList) => {
+    try {
+      const entries = await Promise.all(
+        projectList.map(async (p) => {
+          try {
+            const res = await fetch(`${baseUrl}/api/projects/${p.id}/summary`)
+            if (!res.ok) throw new Error('Failed to fetch summary')
+            const data = await res.json()
+            return [p.id, data]
+          } catch (err) {
+            console.error(`Summary fetch failed for project ${p.id}`, err)
+            return [p.id, null]
+          }
+        })
+      )
+      setSummaries(Object.fromEntries(entries))
+    } catch (err) {
+      console.error('Error fetching summaries', err)
+    }
   }
 
   const handleSaveEdit = async (id) => {
@@ -129,6 +157,12 @@ function ProjectsList({ refresh, onRefresh, onNewProject }) {
                       <p className="complexity">
                         Complexity: <span className="badge">{project.complexity}</span>
                       </p>
+                      {summaries[project.id] && (
+                        <p className="summary-pill">
+                          <span className={`health-dot health-${summaries[project.id].health}`}></span>
+                          {summaries[project.id].summary}
+                        </p>
+                      )}
                       {project.tags && (
                         <div className="tags">
                           {project.tags.split(',').map((tag, i) => (
@@ -137,6 +171,18 @@ function ProjectsList({ refresh, onRefresh, onNewProject }) {
                             </span>
                           ))}
                         </div>
+                      )}
+                      {project.git_remote_url && (
+                        <p className="git-link">
+                          🔗 <a
+                            href={project.git_remote_url.replace(/^git@github\.com:/, 'https://github.com/').replace(/\.git$/, '')}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {project.git_remote_url.replace(/^.*[:/]/, '').replace(/\.git$/, '')}
+                          </a>
+                        </p>
                       )}
                     </div>
                     <div className="project-actions">

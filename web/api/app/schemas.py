@@ -85,6 +85,20 @@ class Project(ProjectBase):
     class Config:
         from_attributes = True
 
+
+class ProjectSummary(BaseModel):
+    project_id: int
+    status: str
+    health: str
+    repo_count: int
+    open_issues: int
+    last_activity_at: Optional[datetime] = None
+    last_synced_at: Optional[datetime] = None
+    summary: str
+    recommendations: List[str] = []
+    generator: str = "heuristic"
+    ai_available: bool = False
+
 # Note schemas
 class NoteBase(BaseModel):
     content: str

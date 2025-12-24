@@ -6,6 +6,8 @@ function KanbanBoard({ onProjectSelect }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [draggedProject, setDraggedProject] = useState(null)
+  const [summaries, setSummaries] = useState({})
+  const [healthFilter, setHealthFilter] = useState('all')
 
   const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
@@ -19,6 +21,10 @@ function KanbanBoard({ onProjectSelect }) {
   useEffect(() => {
     fetchProjects()
   }, [])
+
+  useEffect(() => {
+    if (projects.length) fetchSummaries(projects)
+  }, [projects])
 
   const fetchProjects = async () => {
     setLoading(true)
@@ -37,10 +43,37 @@ function KanbanBoard({ onProjectSelect }) {
     }
   }
 
+  const fetchSummaries = async (list) => {
+    try {
+      const entries = await Promise.all(
+        list.map(async (p) => {
+          try {
+            const res = await fetch(`${baseUrl}/api/projects/${p.id}/summary`)
+            if (!res.ok) throw new Error('Failed summary')
+            const data = await res.json()
+            return [p.id, data]
+          } catch {
+            return [p.id, null]
+          }
+        })
+      )
+      setSummaries(Object.fromEntries(entries))
+    } catch (err) {
+      console.error('Error fetching summaries', err)
+    }
+  }
+
   const getProjectsByStatus = (status) => {
-    return projects
+    const filtered = projects
       .filter(p => p.status === status)
+      .filter(p => {
+        if (healthFilter === 'all') return true
+        const summary = summaries[p.id]
+        if (!summary) return false
+        return summary.health === healthFilter
+      })
       .sort((a, b) => a.position - b.position)
+    return filtered
   }
 
   const handleDragStart = (e, project) => {
@@ -96,6 +129,16 @@ function KanbanBoard({ onProjectSelect }) {
       <div className="kanban-header">
         <h2>📊 Project Kanban</h2>
         <p>Drag projects between columns to track progress</p>
+        <div className="kanban-filters">
+          <label>Health filter:</label>
+          <select value={healthFilter} onChange={(e) => setHealthFilter(e.target.value)}>
+            <option value="all">All</option>
+            <option value="healthy">Healthy</option>
+            <option value="stale">Stale</option>
+            <option value="dormant">Dormant</option>
+            <option value="unknown">Unknown</option>
+          </select>
+        </div>
       </div>
 
       <div className="kanban-columns">
@@ -124,6 +167,17 @@ function KanbanBoard({ onProjectSelect }) {
                   onClick={() => onProjectSelect && onProjectSelect(project.id)}
                 >
                   <h4>{project.name}</h4>
+                  {summaries[project.id] && (
+                    <div className="card-health">
+                      <span className={`health-dot health-${summaries[project.id].health}`}></span>
+                      <span className="health-text">{summaries[project.id].health}</span>
+                      {summaries[project.id].last_activity_at && (
+                        <span className="health-meta">
+                          Last activity {new Date(summaries[project.id].last_activity_at).toLocaleDateString()}
+                        </span>
+                      )}
+                    </div>
+                  )}
                   {project.domain && (
                     <span className="card-domain">{project.domain}</span>
                   )}

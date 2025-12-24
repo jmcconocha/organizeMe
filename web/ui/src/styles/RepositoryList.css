@@ -74,6 +74,17 @@
   background: #999;
 }
 
+.btn-use-remote {
+  background: #f3f4f6;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+.btn-use-remote:hover {
+  background: #e5e7eb;
+  border-color: #cbd5e1;
+}
+
 .repository-form button:hover {
   background: #0052a3;
 }

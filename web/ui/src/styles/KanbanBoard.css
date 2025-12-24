@@ -19,6 +19,19 @@
   color: #666;
 }
 
+.kanban-filters {
+  margin-top: 0.5rem;
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.kanban-filters select {
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+}
+
 .kanban-loading,
 .kanban-error {
   text-align: center;
@@ -139,6 +152,45 @@
   margin-top: 0.75rem;
   padding-top: 0.75rem;
   border-top: 1px solid #f0f0f0;
+}
+
+.card-health {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.35rem;
+  color: #374151;
+  font-size: 0.9rem;
+}
+
+.health-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.health-healthy {
+  background: #16a34a;
+}
+
+.health-stale {
+  background: #f97316;
+}
+
+.health-dormant,
+.health-unknown {
+  background: #ef4444;
+}
+
+.health-text {
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.health-meta {
+  color: #6b7280;
+  font-size: 0.8rem;
 }
 
 .phase-badge {

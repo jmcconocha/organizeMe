@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import RepositoryList from './RepositoryList'
 import ActivityTimeline from './ActivityTimeline'
+import ProjectTasks from './ProjectTasks'
+import ProjectNotes from './ProjectNotes'
 import '../styles/ProjectDetail.css'
 
 function ProjectDetail({ projectId, onClose }) {
@@ -10,6 +12,9 @@ function ProjectDetail({ projectId, onClose }) {
   const [repositories, setRepositories] = useState([])
   const [selectedRepoId, setSelectedRepoId] = useState(null)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
+  const [summary, setSummary] = useState(null)
+  const [summaryStrategy, setSummaryStrategy] = useState('heuristic')
+  const [summaryLoading, setSummaryLoading] = useState(false)
 
   const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
@@ -17,8 +22,9 @@ function ProjectDetail({ projectId, onClose }) {
     if (projectId) {
       fetchProject()
       fetchRepositories()
+      fetchSummary(summaryStrategy)
     }
-  }, [projectId, refreshTrigger])
+  }, [projectId, refreshTrigger, summaryStrategy])
 
   const fetchProject = async () => {
     setLoading(true)
@@ -50,6 +56,20 @@ function ProjectDetail({ projectId, onClose }) {
     }
   }
 
+  const fetchSummary = async (strategy = 'heuristic') => {
+    setSummaryLoading(true)
+    try {
+      const res = await fetch(`${baseUrl}/api/projects/${projectId}/summary?strategy=${strategy}`)
+      if (!res.ok) throw new Error('Failed to fetch project summary')
+      const data = await res.json()
+      setSummary(data)
+    } catch (err) {
+      console.error('Error fetching project summary:', err)
+    } finally {
+      setSummaryLoading(false)
+    }
+  }
+
   if (loading) {
     return <div className="project-detail-modal"><div className="loading">Loading...</div></div>
   }
@@ -76,6 +96,51 @@ function ProjectDetail({ projectId, onClose }) {
           <h2>{project.name}</h2>
           <button className="close-btn" onClick={onClose}>✕</button>
         </div>
+
+        {summary && (
+          <div className="project-summary">
+            <div className="summary-actions">
+              <span className="summary-label">Summary mode:</span>
+              <div className="summary-toggle">
+                <button
+                  className={summaryStrategy === 'heuristic' ? 'toggle active' : 'toggle'}
+                  onClick={() => setSummaryStrategy('heuristic')}
+                  disabled={summaryStrategy === 'heuristic'}
+                >
+                  Heuristic
+                </button>
+                <button
+                  className={summaryStrategy === 'ai' ? 'toggle active' : 'toggle'}
+                  onClick={() => setSummaryStrategy('ai')}
+                  disabled={!summary.ai_available || summaryStrategy === 'ai'}
+                  title={summary.ai_available ? 'Use AI-generated summary' : 'AI not configured'}
+                >
+                  AI
+                </button>
+                {summaryLoading && <span className="summary-loading">Refreshing...</span>}
+              </div>
+            </div>
+            <div className="summary-row">
+              <span className={`health-badge health-${summary.health}`}>{summary.health}</span>
+              <span className="summary-text">{summary.summary}</span>
+            </div>
+            <div className="summary-meta">
+              <span>Status: {summary.status}</span>
+              <span>Repos: {summary.repo_count}</span>
+              <span>Open issues: {summary.open_issues}</span>
+            </div>
+            {summary.recommendations && summary.recommendations.length > 0 && (
+              <ul className="summary-recommendations">
+                {summary.recommendations.map((rec, idx) => (
+                  <li key={idx}>{rec}</li>
+                ))}
+              </ul>
+            )}
+            {summary.ai_available && (
+              <div className="ai-note">AI agent available; toggle to AI for model-generated summary.</div>
+            )}
+          </div>
+        )}
 
         <div className="modal-body">
           <div className="project-info">
@@ -109,12 +174,33 @@ function ProjectDetail({ projectId, onClose }) {
                 </div>
               </div>
             )}
+            {(project.local_path || project.git_remote_url) && (
+              <div className="info-section">
+                <label>Links</label>
+                <div className="project-links">
+                  {project.local_path && (
+                    <a href={`vscode://file${project.local_path}`} className="link-btn">
+                      📂 Open in VS Code
+                    </a>
+                  )}
+                  {project.git_remote_url && (
+                    <a
+                      href={project.git_remote_url.replace(/^git@github\.com:/, 'https://github.com/').replace(/\.git$/, '')}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="link-btn"
+                    >
+                      🔗 Open on GitHub
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           <RepositoryList
-            token={token}
-            baseUrl={baseUrl}
             projectId={projectId}
+            gitRemoteUrl={project.git_remote_url}
             onRepositoryAdded={() => {
               setRefreshTrigger(refreshTrigger + 1)
               setSelectedRepoId(null)
@@ -124,11 +210,14 @@ function ProjectDetail({ projectId, onClose }) {
 
           {selectedRepoId && (
             <ActivityTimeline
-              token={token}
-              baseUrl={baseUrl}
               repositoryId={selectedRepoId}
             />
           )}
+
+          <div className="project-panels">
+            <ProjectTasks projectId={projectId} />
+            <ProjectNotes projectId={projectId} />
+          </div>
         </div>
       </div>
     </div>

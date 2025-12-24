@@ -1,21 +1,25 @@
 """Repository endpoints for linking GitHub repos to projects"""
 
+import os
+from datetime import datetime, timedelta
+from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+
 from app.database import get_db
 from app.models import Repository, Project, Activity
 from app.schemas import Repository as RepositorySchema, RepositoryCreate, Activity as ActivitySchema
 from app.github_client import GitHubClient, parse_repo_full_name
 from app.services_sync import sync_repository
-from datetime import datetime, timedelta
-from typing import List
 
 router = APIRouter(prefix="/api/repositories", tags=["repositories"])
 
 
 def _github_client() -> GitHubClient:
-    """Return a GitHub client for public API access (no authentication)."""
-    return GitHubClient(token=None)
+    """Return a GitHub client using PAT when available to access private repos."""
+    token = os.getenv("GITHUB_TOKEN")
+    return GitHubClient(token=token)
 
 @router.post("", response_model=RepositorySchema)
 async def link_repository(

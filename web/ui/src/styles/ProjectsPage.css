@@ -176,3 +176,53 @@
   border-radius: 6px;
   border: 1px solid #bbdefb;
 }
+
+.modal-content.wide {
+  max-width: 600px;
+}
+
+.ai-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ai-form input {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+
+.ai-form .form-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.ai-form button {
+  padding: 0.6rem 0.9rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.ai-form button.secondary {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.ai-form button:not(.secondary) {
+  background: #2563eb;
+  color: #fff;
+}
+
+.helper {
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+
+.status-text {
+  margin-top: 0.5rem;
+  color: #374151;
+}
