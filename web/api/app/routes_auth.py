@@ -4,6 +4,7 @@ from app.database import get_db
 from app.models import User
 from app.schemas import UserCreate, UserLogin, User as UserSchema
 from app.security import hash_password, verify_password, create_access_token
+from app.dependencies import get_current_user as get_current_user_dep
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -37,9 +38,6 @@ async def login(user_data: UserLogin, db: Session = Depends(get_db)):
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.get("/me", response_model=UserSchema)
-async def get_current_user(db: Session = Depends(get_db), token: str = None):
-    """Get current logged-in user (placeholder)"""
-    if not token:
-        raise HTTPException(status_code=401, detail="Not authenticated")
-    # TODO: extract user from JWT token
-    return None
+async def get_current_user_endpoint(current_user: User = Depends(get_current_user_dep)):
+    """Get current logged-in user"""
+    return current_user

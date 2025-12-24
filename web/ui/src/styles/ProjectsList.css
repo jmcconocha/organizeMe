@@ -1,0 +1,140 @@
+.projects-list {
+  margin-top: 20px;
+}
+
+.no-projects {
+  text-align: center;
+  color: #999;
+  padding: 40px;
+  font-style: italic;
+}
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.project-card {
+  background: #f9f9f9;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 20px;
+  transition: box-shadow 0.2s;
+}
+
+.project-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.project-card h3 {
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+.project-card .domain {
+  color: #666;
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.project-card .phase,
+.project-card .complexity {
+  margin: 5px 0;
+  font-size: 14px;
+  color: #555;
+}
+
+.badge {
+  display: inline-block;
+  background: #667eea;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.tags {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.tag {
+  display: inline-block;
+  background: #e0e7ff;
+  color: #667eea;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+.project-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.btn-edit,
+.btn-delete {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.btn-edit {
+  background: #667eea;
+  color: white;
+}
+
+.btn-edit:hover {
+  background: #5568d3;
+}
+
+.btn-delete {
+  background: #ff6b6b;
+  color: white;
+}
+
+.btn-delete:hover {
+  background: #ee5a52;
+}
+
+.project-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.project-edit input,
+.project-edit select {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.project-edit button {
+  padding: 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.project-edit button:first-of-type {
+  background: #667eea;
+  color: white;
+}
+
+.project-edit button:last-of-type {
+  background: #ddd;
+  color: #333;
+}
