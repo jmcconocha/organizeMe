@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react'
 import ProjectDetail from './ProjectDetail'
 import '../styles/ProjectsList.css'
 
-function ProjectsList({ token, baseUrl, refresh, onRefresh }) {
+function ProjectsList({ refresh, onRefresh, onNewProject }) {
   const [projects, setProjects] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [editingId, setEditingId] = useState(null)
   const [editForm, setEditForm] = useState({})
   const [selectedProjectId, setSelectedProjectId] = useState(null)
+
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
   useEffect(() => {
     fetchProjects()
@@ -18,9 +20,7 @@ function ProjectsList({ token, baseUrl, refresh, onRefresh }) {
     setLoading(true)
     setError('')
     try {
-      const res = await fetch(`${baseUrl}/api/projects`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      const res = await fetch(`${baseUrl}/api/projects`)
       if (!res.ok) throw new Error('Failed to fetch projects')
       const data = await res.json()
       setProjects(data)
@@ -36,7 +36,6 @@ function ProjectsList({ token, baseUrl, refresh, onRefresh }) {
     try {
       const res = await fetch(`${baseUrl}/api/projects/${id}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
       })
       if (!res.ok) throw new Error('Failed to delete project')
       onRefresh()
@@ -56,7 +55,6 @@ function ProjectsList({ token, baseUrl, refresh, onRefresh }) {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(editForm),
       })
@@ -166,8 +164,6 @@ function ProjectsList({ token, baseUrl, refresh, onRefresh }) {
       {selectedProjectId && (
         <ProjectDetail
           projectId={selectedProjectId}
-          token={token}
-          baseUrl={baseUrl}
           onClose={() => {
             setSelectedProjectId(null)
             onRefresh()

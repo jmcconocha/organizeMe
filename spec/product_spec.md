@@ -6,41 +6,46 @@
 - Value: Rapid context recovery, metadata-rich filtering, PR/branch visibility, and cross-project insights.
 
 ## Goals
-- Track key metadata per project: domain, tech stack, git state (branch/PR), activity timeline, notes, AI tools used.
+- Automatically discover and track local projects by scanning folder structures.
+- Extract key metadata per project: domain, tech stack, git state, activity timeline, notes, AI tools used.
 - Provide fast portfolio dashboard with powerful filters and search.
-- Integrate with GitHub (optional OAuth) to fetch PRs/branches and recent activity.
 - Share the same SQLite schema with the existing CLI; background scanning jobs keep data fresh.
+- (Future) Integrate with GitHub OAuth to fetch PRs/branches and recent activity.
 
 ## Personas
-- Developer: Needs quick status, last activity, and notes to resume work.
-- Tech Lead: Monitors active feature branches/PRs across repos.
+- Developer: Needs quick status, last activity, and notes to resume work across multiple local projects.
+- Tech Lead: Monitors active feature branches across repos in a workspace.
 - Project Manager: Views progress, phase (MVP/Production), and activity trends.
-- Admin/Security: Ensures tokens and permissions are handled correctly.
 
 ## Success Metrics
-- MAU of dashboard; average time-to-context < 10s.
-- % projects with tech/domain tags; % projects linked to repos.
+- Average time-to-context < 10s.
+- % projects with tech/domain tags auto-detected; % projects discovered via scan.
 - Scan freshness: 90% repos updated within 60 minutes.
 - Error rate < 0.5% on API; p95 read latency < 300 ms.
 
 ## Core Features
-- Project registry with CRUD and repo linking.
+- Local folder scanning to auto-discover git repositories.
+- Project registry with CRUD and manual addition.
+- Kanban board for portfolio-level project management (columns: backlog, active, completed, archived).
+- Project drill-down with kanban for managing phases and tasks within each project.
+- Automatic metadata extraction: tech stack detection, git state (branch, last commit).
 - Tech stack + domain tagging; filters and search.
-- Git state view (branch, PRs, ahead/behind, last commit).
-- Activity timeline (commits/PR events/scans).
+- Activity timeline (local git history/scans).
 - Notes per project; AI tool usage records per project.
-- Background scanning jobs; manual refresh triggers.
-- Per-user dashboard and settings.
+- Background re-scanning jobs; manual refresh triggers.
+- Single-user dashboard (multi-user as future feature).
 
 ## Non-Functional Requirements
 - Performance: p95 < 300 ms on common reads; pagination on lists.
 - Reliability: Job retries with backoff; health checks; backups.
-- Security: OAuth tokens encrypted; RBAC; CSRF/CORS; audit logging.
-- Accessibility: WCAG 2.2 AA; keyboard navigation and ARIA.
+- Security: SQLite file permissions; simple deployment model.
+- Accessibility: WCAG 2.2 AA (future); keyboard navigation and ARIA.
 - Operability: Metrics, logs, alerts; simple Docker deployment.
 
 ## Out of Scope (Initial)
-- Non-Git providers beyond GitHub.
+- User authentication and multi-user support.
+- GitHub OAuth integration and PR syncing.
+- Non-Git providers.
 - Issue/task tracking; CI orchestration.
 - Billing/multi-tenant SaaS.
 

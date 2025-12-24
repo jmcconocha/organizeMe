@@ -1,28 +1,6 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional, List
-
-# User schemas
-class UserBase(BaseModel):
-    email: EmailStr
-    name: Optional[str] = None
-
-class UserCreate(UserBase):
-    password: str
-
-class UserLogin(BaseModel):
-    email: EmailStr
-    password: str
-
-class User(UserBase):
-    id: int
-    role: str
-    created_at: datetime
-    last_login_at: Optional[datetime]
-    github_username: Optional[str] = None
-    
-    class Config:
-        from_attributes = True
+from typing import Optional, List, Dict, Any
 
 # Activity schemas
 class ActivityBase(BaseModel):
@@ -76,6 +54,9 @@ class ProjectBase(BaseModel):
     phase: Optional[str] = "prototype"
     complexity: Optional[str] = None
     tags: Optional[str] = None
+    local_path: Optional[str] = None
+    git_remote_url: Optional[str] = None
+    status: Optional[str] = "backlog"
 
 class ProjectCreate(ProjectBase):
     pass
@@ -86,11 +67,17 @@ class ProjectUpdate(BaseModel):
     phase: Optional[str] = None
     complexity: Optional[str] = None
     tags: Optional[str] = None
+    status: Optional[str] = None
+    position: Optional[int] = None
+    local_path: Optional[str] = None
+    git_remote_url: Optional[str] = None
 
 class Project(ProjectBase):
     id: int
-    owner_id: int
     visibility: str
+    position: int
+    detected_tech_stack: Optional[Dict[str, Any]] = None
+    last_scanned: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
     repositories: List[Repository] = []
@@ -113,9 +100,59 @@ class NoteUpdate(BaseModel):
 class Note(NoteBase):
     id: int
     project_id: int
-    author_id: int
     created_at: datetime
     updated_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+# Task schemas (for project-level kanban)
+class TaskBase(BaseModel):
+    title: str
+    description: Optional[str] = None
+    status: Optional[str] = "todo"
+
+class TaskCreate(TaskBase):
+    project_id: int
+
+class TaskUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    status: Optional[str] = None
+    position: Optional[int] = None
+
+class Task(TaskBase):
+    id: int
+    project_id: int
+    position: int
+    created_at: datetime
+    updated_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+# Scan schemas
+class ScanBase(BaseModel):
+    scan_path: str
+
+class ScanCreate(ScanBase):
+    pass
+
+class ScanResult(BaseModel):
+    name: str
+    path: str
+    remote_url: Optional[str] = None
+    tech_stack: Dict[str, Any]
+    current_branch: Optional[str] = None
+
+class Scan(ScanBase):
+    id: int
+    projects_found: int
+    projects_imported: int
+    status: str
+    error_message: Optional[str] = None
+    started_at: datetime
+    completed_at: Optional[datetime] = None
     
     class Config:
         from_attributes = True

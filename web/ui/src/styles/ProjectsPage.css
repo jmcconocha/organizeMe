@@ -17,6 +17,57 @@
   color: #333;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.view-tabs {
+  display: flex;
+  gap: 0.5rem;
+  background: #f5f5f5;
+  padding: 0.25rem;
+  border-radius: 8px;
+}
+
+.view-tabs .tab {
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  color: #666;
+  transition: all 0.3s;
+}
+
+.view-tabs .tab:hover {
+  background: white;
+  color: #333;
+}
+
+.view-tabs .tab.active {
+  background: white;
+  color: #2196F3;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary {
+  padding: 0.5rem 1rem;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.3s;
+}
+
+.btn-primary:hover {
+  background: #45a049;
+}
+
 .logout-btn {
   padding: 8px 16px;
   background: #ff6b6b;

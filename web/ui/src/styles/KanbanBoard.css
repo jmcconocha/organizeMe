@@ -1,0 +1,202 @@
+.kanban-board {
+  padding: 2rem;
+  background: #f5f5f5;
+  min-height: 100vh;
+}
+
+.kanban-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.kanban-header h2 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.kanban-header p {
+  color: #666;
+}
+
+.kanban-loading,
+.kanban-error {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.2rem;
+}
+
+.kanban-error {
+  color: #c62828;
+}
+
+.kanban-columns {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+@media (max-width: 1400px) {
+  .kanban-columns {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .kanban-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+.kanban-column {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  min-height: 600px;
+}
+
+.column-header {
+  padding: 1rem 1.5rem;
+  border-top: 4px solid;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fafafa;
+}
+
+.column-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.column-header .count {
+  background: #e0e0e0;
+  color: #555;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.column-content {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.kanban-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  cursor: move;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.kanban-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.kanban-card h4 {
+  margin: 0 0 0.5rem 0;
+  color: #333;
+  font-size: 1rem;
+}
+
+.card-domain {
+  display: inline-block;
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.card-description {
+  color: #666;
+  font-size: 0.875rem;
+  margin: 0.5rem 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f0f0f0;
+}
+
+.phase-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.phase-idea {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.phase-prototype {
+  background: #f3e5f5;
+  color: #6a1b9a;
+}
+
+.phase-active {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.phase-maintenance {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.phase-archived {
+  background: #f5f5f5;
+  color: #616161;
+}
+
+.tech-icons {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.tech-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #9c27b0;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.empty-column {
+  text-align: center;
+  color: #999;
+  padding: 3rem 1rem;
+  border: 2px dashed #ddd;
+  border-radius: 6px;
+  margin-top: 1rem;
+}

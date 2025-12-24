@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import '../styles/ProjectForm.css'
 
-function ProjectForm({ token, baseUrl, onSuccess }) {
+function ProjectForm({ onSuccess }) {
   const [formData, setFormData] = useState({
     name: '',
     domain: '',
@@ -11,6 +11,8 @@ function ProjectForm({ token, baseUrl, onSuccess }) {
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -27,7 +29,6 @@ function ProjectForm({ token, baseUrl, onSuccess }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(formData),
       })

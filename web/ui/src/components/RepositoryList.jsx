@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react'
 import '../styles/RepositoryList.css'
 
-function RepositoryList({ token, baseUrl, projectId, onRepositoryAdded, onSelectRepository }) {
+function RepositoryList({ projectId, onRepositoryAdded, onSelectRepository }) {
   const [repositories, setRepositories] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [showForm, setShowForm] = useState(false)
   const [formData, setFormData] = useState({ full_name: '' })
   const [syncing, setSyncing] = useState({})
+
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
   useEffect(() => {
     if (projectId) {
@@ -19,9 +21,7 @@ function RepositoryList({ token, baseUrl, projectId, onRepositoryAdded, onSelect
     setLoading(true)
     setError('')
     try {
-      const res = await fetch(`${baseUrl}/api/repositories/project/${projectId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      const res = await fetch(`${baseUrl}/api/repositories/project/${projectId}`)
       if (!res.ok) throw new Error('Failed to fetch repositories')
       const data = await res.json()
       setRepositories(data)
@@ -44,7 +44,6 @@ function RepositoryList({ token, baseUrl, projectId, onRepositoryAdded, onSelect
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           full_name: formData.full_name,

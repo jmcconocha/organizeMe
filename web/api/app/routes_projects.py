@@ -1,9 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models import Project, User
+from app.models import Project
 from app.schemas import Project as ProjectSchema, ProjectCreate, ProjectUpdate
-from app.dependencies import get_current_user
 from typing import List
 
 router = APIRouter(prefix="/api/projects", tags=["projects"])
@@ -11,24 +10,24 @@ router = APIRouter(prefix="/api/projects", tags=["projects"])
 @router.get("", response_model=List[ProjectSchema])
 async def list_projects(
     skip: int = 0,
-    limit: int = 10,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    limit: int = 100,
+    status: str = None,
+    db: Session = Depends(get_db)
 ):
-    """List all projects for current user"""
-    projects = db.query(Project).filter(
-        Project.owner_id == current_user.id
-    ).offset(skip).limit(limit).all()
+    """List all projects (single-user mode)"""
+    query = db.query(Project)
+    if status:
+        query = query.filter(Project.status == status)
+    projects = query.order_by(Project.position).offset(skip).limit(limit).all()
     return projects
 
 @router.post("", response_model=ProjectSchema)
 async def create_project(
     project: ProjectCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
     """Create a new project"""
-    db_project = Project(**project.dict(), owner_id=current_user.id)
+    db_project = Project(**project.dict())
     db.add(db_project)
     db.commit()
     db.refresh(db_project)
@@ -37,14 +36,10 @@ async def create_project(
 @router.get("/{project_id}", response_model=ProjectSchema)
 async def get_project(
     project_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
     """Get a specific project"""
-    project = db.query(Project).filter(
-        Project.id == project_id,
-        Project.owner_id == current_user.id
-    ).first()
+    project = db.query(Project).filter(Project.id == project_id).first()
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
     return project
@@ -53,14 +48,10 @@ async def get_project(
 async def update_project(
     project_id: int,
     project_update: ProjectUpdate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
     """Update a project"""
-    db_project = db.query(Project).filter(
-        Project.id == project_id,
-        Project.owner_id == current_user.id
-    ).first()
+    db_project = db.query(Project).filter(Project.id == project_id).first()
     if not db_project:
         raise HTTPException(status_code=404, detail="Project not found")
     
@@ -74,14 +65,10 @@ async def update_project(
 @router.delete("/{project_id}")
 async def delete_project(
     project_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
     """Delete a project"""
-    db_project = db.query(Project).filter(
-        Project.id == project_id,
-        Project.owner_id == current_user.id
-    ).first()
+    db_project = db.query(Project).filter(Project.id == project_id).first()
     if not db_project:
         raise HTTPException(status_code=404, detail="Project not found")
     

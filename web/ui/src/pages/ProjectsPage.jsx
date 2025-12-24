@@ -1,59 +1,29 @@
-import React, { useState, useEffect, useContext } from 'react'
-import { AuthContext } from '../context/AuthContext'
+import React, { useState } from 'react'
 import ProjectsList from '../components/ProjectsList'
 import ProjectForm from '../components/ProjectForm'
+import FolderScanner from '../components/FolderScanner'
+import KanbanBoard from '../components/KanbanBoard'
+import ProjectDetail from '../components/ProjectDetail'
 import '../styles/ProjectsPage.css'
 
 function ProjectsPage() {
-  const { token, logout, user, refreshUser } = useContext(AuthContext)
   const [showForm, setShowForm] = useState(false)
   const [refresh, setRefresh] = useState(0)
-  const [notice, setNotice] = useState('')
-  const [connecting, setConnecting] = useState(false)
-
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    if (params.get('github_connected')) {
-      setNotice(`GitHub connected${params.get('github_username') ? ` as ${params.get('github_username')}` : ''}`)
-      refreshUser && refreshUser()
-      params.delete('github_connected')
-      params.delete('github_username')
-      const newUrl = `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ''}`
-      window.history.replaceState({}, '', newUrl)
-    }
-  }, [refreshUser])
-
-  const handleLogout = () => {
-    logout()
-  }
+  const [activeView, setActiveView] = useState('list') // 'list', 'kanban', 'scanner'
+  const [selectedProjectId, setSelectedProjectId] = useState(null)
 
   const handleProjectCreated = () => {
     setShowForm(false)
     setRefresh(refresh + 1)
   }
 
-  const handleConnectGitHub = async () => {
-    setNotice('')
-    setConnecting(true)
-    try {
-      const returnTo = encodeURIComponent(window.location.href)
-      const res = await fetch(`${baseUrl}/api/github/oauth/start?return_to=${returnTo}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      if (!res.ok) throw new Error('Failed to start GitHub OAuth')
-      const data = await res.json()
-      if (data.authorization_url) {
-        window.location.href = data.authorization_url
-      } else {
-        throw new Error('Invalid OAuth response')
-      }
-    } catch (err) {
-      setNotice(`GitHub connect error: ${err.message}`)
-    } finally {
-      setConnecting(false)
-    }
+  const handleImportComplete = (imported) => {
+    setRefresh(refresh + 1)
+    setActiveView('list')
+  }
+
+  const handleProjectSelect = (projectId) => {
+    setSelectedProjectId(projectId)
   }
 
   return (
@@ -61,48 +31,67 @@ function ProjectsPage() {
       <header className="page-header">
         <h1>Project Portfolio Manager</h1>
         <div className="header-actions">
-          {user?.github_username ? (
-            <span className="github-connected">GitHub: {user.github_username}</span>
-          ) : (
-            <button className="btn-secondary" onClick={handleConnectGitHub} disabled={connecting}>
-              {connecting ? 'Connecting…' : 'Connect GitHub'}
+          <div className="view-tabs">
+            <button
+              className={`tab ${activeView === 'list' ? 'active' : ''}`}
+              onClick={() => setActiveView('list')}
+            >
+              📋 List
+            </button>
+            <button
+              className={`tab ${activeView === 'kanban' ? 'active' : ''}`}
+              onClick={() => setActiveView('kanban')}
+            >
+              📊 Kanban
+            </button>
+            <button
+              className={`tab ${activeView === 'scanner' ? 'active' : ''}`}
+              onClick={() => setActiveView('scanner')}
+            >
+              🔍 Scan Folders
+            </button>
+          </div>
+          {activeView === 'list' && (
+            <button className="btn-primary" onClick={() => setShowForm(!showForm)}>
+              {showForm ? 'Cancel' : 'New Project'}
             </button>
           )}
-          <button className="logout-btn" onClick={handleLogout}>
-            Logout
-          </button>
         </div>
       </header>
 
-      {notice && <div className="notice-banner">{notice}</div>}
-
       <main className="page-content">
-        <div className="projects-section">
-          <div className="section-header">
-            <h2>Projects</h2>
-            <button
-              className="btn-primary"
-              onClick={() => setShowForm(!showForm)}
-            >
-              {showForm ? 'Cancel' : 'New Project'}
-            </button>
-          </div>
-
-          {showForm && (
-            <ProjectForm
-              token={token}
-              baseUrl={baseUrl}
-              onSuccess={handleProjectCreated}
+        {activeView === 'list' && (
+          <div className="projects-section">
+            <ProjectsList
+              refresh={refresh}
+              onRefresh={() => setRefresh(refresh + 1)}
+              onNewProject={() => setShowForm(true)}
             />
-          )}
+          </div>
+        )}
 
-          <ProjectsList
-            token={token}
-            baseUrl={baseUrl}
-            refresh={refresh}
-            onRefresh={() => setRefresh(refresh + 1)}
+        {activeView === 'kanban' && (
+          <KanbanBoard onProjectSelect={handleProjectSelect} />
+        )}
+
+        {activeView === 'scanner' && (
+          <FolderScanner onImportComplete={handleImportComplete} />
+        )}
+
+        {showForm && (
+          <div className="modal-overlay" onClick={() => setShowForm(false)}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <ProjectForm onSuccess={handleProjectCreated} />
+            </div>
+          </div>
+        )}
+
+        {selectedProjectId && (
+          <ProjectDetail
+            projectId={selectedProjectId}
+            onClose={() => setSelectedProjectId(null)}
           />
-        </div>
+        )}
       </main>
     </div>
   )

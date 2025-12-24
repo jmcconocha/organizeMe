@@ -3,11 +3,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models import Repository, Project, User, Activity
+from app.models import Repository, Project, Activity
 from app.schemas import Repository as RepositorySchema, RepositoryCreate, Activity as ActivitySchema
-from app.dependencies import get_current_user
 from app.github_client import GitHubClient, parse_repo_full_name
-from app.security import decrypt_token
 from app.services_sync import sync_repository
 from datetime import datetime, timedelta
 from typing import List
@@ -15,22 +13,18 @@ from typing import List
 router = APIRouter(prefix="/api/repositories", tags=["repositories"])
 
 
-def _github_client_for(user: User) -> GitHubClient:
-    """Return a GitHub client using the user's token if configured."""
-    return GitHubClient(token=decrypt_token(user.github_token))
+def _github_client() -> GitHubClient:
+    """Return a GitHub client for public API access (no authentication)."""
+    return GitHubClient(token=None)
 
 @router.post("", response_model=RepositorySchema)
 async def link_repository(
     repo_data: RepositoryCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
     """Link a GitHub repository to a project"""
-    # Verify project exists and belongs to current user
-    project = db.query(Project).filter(
-        Project.id == repo_data.project_id,
-        Project.owner_id == current_user.id
-    ).first()
+    # Verify project exists
+    project = db.query(Project).filter(Project.id == repo_data.project_id).first()
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
     
@@ -41,7 +35,7 @@ async def link_repository(
         raise HTTPException(status_code=400, detail=str(e))
     
     # Fetch repo info from GitHub
-    github = _github_client_for(current_user)
+    github = _github_client()
     repo_info = await github.get_repository(owner, repo_name)
     if not repo_info:
         raise HTTPException(status_code=404, detail="Repository not found on GitHub")
@@ -56,7 +50,6 @@ async def link_repository(
     # Create repository record
     db_repo = Repository(
         project_id=repo_data.project_id,
-        owner_id=current_user.id,
         github_id=str(repo_info["id"]),
         name=repo_info["name"],
         full_name=repo_info["full_name"],
@@ -76,15 +69,11 @@ async def link_repository(
 @router.get("/project/{project_id}", response_model=List[RepositorySchema])
 async def list_project_repositories(
     project_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
     """List all repositories linked to a project"""
-    # Verify project exists and belongs to current user
-    project = db.query(Project).filter(
-        Project.id == project_id,
-        Project.owner_id == current_user.id
-    ).first()
+    # Verify project exists
+    project = db.query(Project).filter(Project.id == project_id).first()
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
     
@@ -96,14 +85,10 @@ async def list_project_repositories(
 @router.delete("/{repo_id}")
 async def unlink_repository(
     repo_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
     """Unlink a repository from a project"""
-    repo = db.query(Repository).filter(
-        Repository.id == repo_id,
-        Repository.owner_id == current_user.id
-    ).first()
+    repo = db.query(Repository).filter(Repository.id == repo_id).first()
     if not repo:
         raise HTTPException(status_code=404, detail="Repository not found")
     
@@ -112,34 +97,27 @@ async def unlink_repository(
     return {"deleted": True}
 
 @router.post("/{repo_id}/sync")
-async def sync_repository(
+@router.post("/{repo_id}/sync")
+async def sync_repository_endpoint(
     repo_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
     """Sync repository data from GitHub (commits, PRs, releases)"""
-    repo = db.query(Repository).filter(
-        Repository.id == repo_id,
-        Repository.owner_id == current_user.id
-    ).first()
+    repo = db.query(Repository).filter(Repository.id == repo_id).first()
     if not repo:
         raise HTTPException(status_code=404, detail="Repository not found")
     
-    await sync_repository(db, repo, current_user)
+    await sync_repository(db, repo)
     return {"synced": True, "repository": repo}
 
 @router.get("/{repo_id}/activities", response_model=List[ActivitySchema])
 async def list_repository_activities(
     repo_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
     limit: int = 50
 ):
     """List all activities for a repository"""
-    repo = db.query(Repository).filter(
-        Repository.id == repo_id,
-        Repository.owner_id == current_user.id
-    ).first()
+    repo = db.query(Repository).filter(Repository.id == repo_id).first()
     if not repo:
         raise HTTPException(status_code=404, detail="Repository not found")
     

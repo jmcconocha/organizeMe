@@ -3,13 +3,15 @@ import RepositoryList from './RepositoryList'
 import ActivityTimeline from './ActivityTimeline'
 import '../styles/ProjectDetail.css'
 
-function ProjectDetail({ projectId, token, baseUrl, onClose }) {
+function ProjectDetail({ projectId, onClose }) {
   const [project, setProject] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [repositories, setRepositories] = useState([])
   const [selectedRepoId, setSelectedRepoId] = useState(null)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
+
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
   useEffect(() => {
     if (projectId) {
@@ -22,9 +24,7 @@ function ProjectDetail({ projectId, token, baseUrl, onClose }) {
     setLoading(true)
     setError('')
     try {
-      const res = await fetch(`${baseUrl}/api/projects/${projectId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      const res = await fetch(`${baseUrl}/api/projects/${projectId}`)
       if (!res.ok) throw new Error('Failed to fetch project')
       const data = await res.json()
       setProject(data)
@@ -37,9 +37,7 @@ function ProjectDetail({ projectId, token, baseUrl, onClose }) {
 
   const fetchRepositories = async () => {
     try {
-      const res = await fetch(`${baseUrl}/api/repositories/project/${projectId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      const res = await fetch(`${baseUrl}/api/repositories/project/${projectId}`)
       if (!res.ok) throw new Error('Failed to fetch repositories')
       const data = await res.json()
       setRepositories(data)

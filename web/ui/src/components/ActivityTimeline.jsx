@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import '../styles/ActivityTimeline.css'
 
-function ActivityTimeline({ token, baseUrl, repositoryId }) {
+function ActivityTimeline({ repositoryId }) {
   const [activities, setActivities] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [expandedId, setExpandedId] = useState(null)
   const [filter, setFilter] = useState('all')
+
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
   useEffect(() => {
     if (repositoryId) {
@@ -18,9 +20,7 @@ function ActivityTimeline({ token, baseUrl, repositoryId }) {
     setLoading(true)
     setError('')
     try {
-      const res = await fetch(`${baseUrl}/api/repositories/${repositoryId}/activities`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      const res = await fetch(`${baseUrl}/api/repositories/${repositoryId}/activities`)
       if (!res.ok) throw new Error('Failed to fetch activities')
       const data = await res.json()
       setActivities(data)

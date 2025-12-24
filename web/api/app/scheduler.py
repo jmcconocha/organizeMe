@@ -8,7 +8,7 @@ from apscheduler.triggers.interval import IntervalTrigger
 from sqlalchemy.orm import Session
 
 from app.database import SessionLocal
-from app.models import Repository, User
+from app.models import Repository
 from app.services_sync import sync_repository
 
 logger = logging.getLogger(__name__)
@@ -20,16 +20,13 @@ scheduler = AsyncIOScheduler()
 
 
 async def run_sync_cycle():
-    """Sync all repositories across users."""
+    """Sync all repositories (single-user mode)."""
     db: Session = SessionLocal()
     try:
         repos = db.query(Repository).all()
         for repo in repos:
-            owner = db.query(User).filter(User.id == repo.owner_id).first()
-            if not owner:
-                continue
             try:
-                await sync_repository(db, repo, owner)
+                await sync_repository(db, repo)
             except Exception as exc:  # pragma: no cover - log and continue
                 logger.warning("Background sync failed for repo %s: %s", repo.full_name, exc)
                 db.rollback()

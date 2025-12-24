@@ -1,11 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
-from app.routes_auth import router as auth_router
 from app.routes_projects import router as projects_router
 from app.routes_notes import router as notes_router
 from app.routes_repositories import router as repositories_router
-from app.routes_github import router as github_router
+from app.routes_scanner import router as scanner_router
+from app.routes_kanban import router as kanban_router
 from app.scheduler import start_scheduler, stop_scheduler
 import os
 import sqlite3
@@ -13,7 +13,7 @@ import sqlite3
 # Create tables
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Project Portfolio Manager API", version="0.2.0")
+app = FastAPI(title="Project Portfolio Manager API", version="0.3.0")
 
 # CORS
 origins = os.getenv("CORS_ORIGIN", "http://localhost:5173").split(",")
@@ -26,11 +26,11 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(auth_router)
 app.include_router(projects_router)
 app.include_router(notes_router)
 app.include_router(repositories_router)
-app.include_router(github_router)
+app.include_router(scanner_router)
+app.include_router(kanban_router)
 
 
 @app.on_event("startup")

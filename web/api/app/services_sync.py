@@ -6,14 +6,13 @@ from typing import Optional
 from sqlalchemy.orm import Session
 
 from app.github_client import GitHubClient, parse_repo_full_name
-from app.models import Activity, Repository, User
-from app.security import decrypt_token
+from app.models import Activity, Repository
 
 
-async def sync_repository(db: Session, repo: Repository, owner: User) -> Repository:
-    """Sync a repository's metadata and activities using the owner's GitHub token when available."""
+async def sync_repository(db: Session, repo: Repository) -> Repository:
+    """Sync a repository's metadata and activities using public GitHub API."""
     owner_login, repo_name = parse_repo_full_name(repo.full_name)
-    github = GitHubClient(token=decrypt_token(owner.github_token))
+    github = GitHubClient(token=None)  # Use public API
 
     # Commits (last 7 days)
     commits = await github.get_repository_commits(
