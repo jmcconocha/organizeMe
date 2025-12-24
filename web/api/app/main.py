@@ -1,7 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.database import engine, Base
+from app.routes_auth import router as auth_router
+from app.routes_projects import router as projects_router
+from app.routes_notes import router as notes_router
 import os
 import sqlite3
+
+# Create tables
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Project Portfolio Manager API", version="0.1.0")
 
@@ -14,6 +21,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include routers
+app.include_router(auth_router)
+app.include_router(projects_router)
+app.include_router(notes_router)
 
 # Health check endpoints
 @app.get("/healthz")
@@ -38,13 +50,3 @@ async def ready():
 async def root():
     """API root"""
     return {"message": "Project Portfolio Manager API v0.1.0"}
-
-@app.get("/api/projects")
-async def list_projects():
-    """Placeholder: list projects"""
-    return {"projects": []}
-
-@app.post("/api/projects")
-async def create_project():
-    """Placeholder: create project"""
-    return {"id": 1, "name": "Example Project"}
