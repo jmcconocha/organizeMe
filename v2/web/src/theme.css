@@ -1,0 +1,70 @@
+/* Light */
+:root,
+[data-theme="light"] {
+  --page-bg: #f7f8fb;
+  --panel: #ffffff;
+  --surface: #ffffff;
+  --surface-raised: #f3f4f6;
+  --text-primary: #111827;
+  --text-muted: #6b7280;
+  --border-strong: rgba(17, 24, 39, 0.12);
+  --accent-500: #60a5fa;
+  --accent-600: #3b82f6;
+}
+
+/* Dark */
+[data-theme="dark"] {
+  --page-bg: #0b1220;
+  --panel: #0f172a;
+  --surface: #0b1220;
+  --surface-raised: #111827;
+  --text-primary: #e5e7eb;
+  --text-muted: #9ca3af;
+  --border-strong: rgba(255, 255, 255, 0.08);
+  --accent-500: #22d3ee;
+  --accent-600: #06b6d4;
+}
+
+/* System */
+[data-theme="system"] {
+  --page-bg: #f7f8fb;
+  --panel: #ffffff;
+  --surface: #ffffff;
+  --surface-raised: #f3f4f6;
+  --text-primary: #111827;
+  --text-muted: #6b7280;
+  --border-strong: rgba(17, 24, 39, 0.12);
+  --accent-500: #60a5fa;
+  --accent-600: #3b82f6;
+}
+@media (prefers-color-scheme: dark) {
+  [data-theme="system"] {
+    --page-bg: #0b1220;
+    --panel: #0f172a;
+    --surface: #0b1220;
+    --surface-raised: #111827;
+    --text-primary: #e5e7eb;
+    --text-muted: #9ca3af;
+    --border-strong: rgba(255, 255, 255, 0.08);
+    --accent-500: #22d3ee;
+    --accent-600: #06b6d4;
+  }
+}
+
+:root { color-scheme: light; }
+[data-theme="dark"] { color-scheme: dark; }
+[data-theme="system"] { color-scheme: light; }
+@media (prefers-color-scheme: dark) {
+  [data-theme="system"] { color-scheme: dark; }
+}
+
+/* Base */
+html, body, #root { height: 100%; }
+body { margin: 0; background: var(--page-bg); color: var(--text-primary); font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif; }
+
+.page { min-height: 100vh; }
+.header { display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid var(--border-strong); background: var(--panel); }
+.content { padding: 1rem; }
+.toggle { display: inline-flex; gap: 0.5rem; padding: 0.35rem; border: 1px solid var(--border-strong); border-radius: 999px; background: var(--surface-raised); }
+.toggle button { padding: 0.4rem 0.8rem; border-radius: 999px; border: 1px solid transparent; background: transparent; color: var(--text-muted); cursor: pointer; }
+.toggle button.active { background: linear-gradient(135deg, var(--accent-500), var(--accent-600)); color: #0b1220; }

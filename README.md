@@ -93,11 +93,6 @@ curl -X POST http://localhost:8000/api/projects \
 - ✅ Environment variable configuration
 
 ## Project Structure
-- `spec/` — Full specification (product, architecture, API, data model, UI, security, deployment, roadmap)
-- `web/api/` — FastAPI backend, Alembic migrations, worker
-- `web/ui/` — React/Vite frontend
-- `docker-compose.yml` — Multi-service orchestration
-- `data/` — SQLite database (shared with CLI)
 
 ## Development
 
@@ -118,6 +113,9 @@ cd web/ui
 npm install
 npm run dev
 ```
+## v2 Reboot (Proposed)
+
+See [spec/reboot.md](spec/reboot.md) for the clean-slate plan. The idea is to build a new `v2/` alongside current code, with a Docker-first setup, a consistent theme/design system, and a trimmed MVP. This keeps the current app running while we rebuild quickly and safely.
 
 ## API Endpoints
 
@@ -128,39 +126,17 @@ All endpoints require JWT token in Authorization header (except register/login):
 - `POST /api/auth/login` - Get JWT token
 - `GET /api/auth/me` - Get current user
 
-### Projects
-- `GET /api/projects` - List projects
-- `POST /api/projects` - Create project
-- `GET /api/projects/{id}` - Get project
-- `PATCH /api/projects/{id}` - Update project
-- `DELETE /api/projects/{id}` - Delete project
+## Clean Start
 
-### Notes
-- `GET /api/notes` - List notes
-- `POST /api/notes` - Create note
-- `GET /api/notes/{id}` - Get note
-- `PATCH /api/notes/{id}` - Update note
-- `DELETE /api/notes/{id}` - Delete note
+This repository is rebooting from scratch under `v2/` with a Docker-first development workflow.
 
-## Next Steps (Phase 2: Git Integration)
+Quickstart:
+```bash
+cd v2
+docker compose -f docker-compose.v2.yml up --build
+```
 
-- [ ] GitHub OAuth authentication
-- [ ] Auto-link repositories to projects
-- [ ] Track git activity (commits, branches, PRs)
-- [ ] Display git state on project cards
-
-See [spec/roadmap.md](spec/roadmap.md) for full roadmap through Phase 4.
-
-## Technology Stack
-
-**Backend**: FastAPI, SQLAlchemy, Pydantic, Alembic, Passlib, PyJWT
-**Frontend**: React, Vite, React Router
-**Database**: SQLite with WAL mode
-**DevOps**: Docker, Docker Compose
-**Security**: bcrypt password hashing, JWT tokens (HS256)
-
-npm install
-npm run dev
+See [v2/README.md](v2/README.md) for details.
 ```
 
 ### Migrations
