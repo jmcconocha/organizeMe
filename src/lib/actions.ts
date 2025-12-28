@@ -149,3 +149,79 @@ export async function refreshProject(projectId: string): Promise<void> {
   revalidatePath(`/projects/${projectId}`)
   revalidatePath('/')
 }
+
+/**
+ * Result of opening a project in Finder.
+ */
+export interface OpenInFinderResult {
+  success: boolean
+  message: string
+}
+
+/**
+ * Opens a project directory in the system file manager (Finder on macOS).
+ *
+ * This server action uses the system's native 'open' command to reveal
+ * the project directory in Finder.
+ *
+ * @param projectPath - The full filesystem path to the project directory
+ * @returns Promise resolving to OpenInFinderResult
+ *
+ * @example
+ * ```tsx
+ * // In a client component
+ * 'use client'
+ * import { openInFinder } from '@/lib/actions'
+ *
+ * function OpenButton({ path }: { path: string }) {
+ *   const handleOpen = async () => {
+ *     const result = await openInFinder(path)
+ *     if (!result.success) {
+ *       console.error(result.message)
+ *     }
+ *   }
+ *   return <button onClick={handleOpen}>Open in Finder</button>
+ * }
+ * ```
+ */
+export async function openInFinder(projectPath: string): Promise<OpenInFinderResult> {
+  try {
+    // Validate path exists
+    const { access } = await import('fs/promises')
+    await access(projectPath)
+
+    // Use child_process to open the directory
+    const { exec } = await import('child_process')
+    const { promisify } = await import('util')
+    const execAsync = promisify(exec)
+
+    // Determine the command based on platform
+    const platform = process.platform
+    let command: string
+
+    if (platform === 'darwin') {
+      // macOS: use 'open' command
+      command = `open "${projectPath}"`
+    } else if (platform === 'win32') {
+      // Windows: use 'explorer' command
+      command = `explorer "${projectPath}"`
+    } else {
+      // Linux: use 'xdg-open' command
+      command = `xdg-open "${projectPath}"`
+    }
+
+    await execAsync(command)
+
+    return {
+      success: true,
+      message: `Opened ${projectPath} in file manager`,
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+
+    return {
+      success: false,
+      message: `Failed to open in Finder: ${errorMessage}`,
+    }
+  }
+}
