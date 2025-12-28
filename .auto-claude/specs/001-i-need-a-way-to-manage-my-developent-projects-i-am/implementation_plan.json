@@ -1,0 +1,591 @@
+{
+  "feature": "Project Management Dashboard",
+  "workflow_type": "feature",
+  "workflow_rationale": "This is a greenfield feature implementation - building an entirely new Next.js 15 application from scratch to provide project visibility and management capabilities.",
+  "phases": [
+    {
+      "id": "phase-1-setup",
+      "name": "Project Setup",
+      "type": "setup",
+      "description": "Initialize Next.js 15 project with TypeScript, Tailwind CSS, and shadcn/ui",
+      "depends_on": [],
+      "parallel_safe": false,
+      "subtasks": [
+        {
+          "id": "subtask-1-1",
+          "description": "Initialize Next.js 15 project with create-next-app",
+          "service": "dashboard",
+          "files_to_modify": [],
+          "files_to_create": [
+            "package.json",
+            "tsconfig.json",
+            "next.config.ts",
+            "tailwind.config.ts"
+          ],
+          "patterns_from": [],
+          "verification": {
+            "type": "command",
+            "command": "npm run build",
+            "expected": "Build completes without errors"
+          },
+          "status": "completed",
+          "notes": "Next.js 15.5.9 project initialized successfully. Build completes without errors. Commit: 40659e9",
+          "updated_at": "2025-12-28T22:38:36.823133+00:00"
+        },
+        {
+          "id": "subtask-1-2",
+          "description": "Initialize shadcn/ui and add required components (button, card, table, badge, separator, tabs)",
+          "service": "dashboard",
+          "files_to_modify": [
+            "package.json"
+          ],
+          "files_to_create": [
+            "components.json",
+            "src/components/ui/button.tsx",
+            "src/components/ui/card.tsx",
+            "src/components/ui/table.tsx",
+            "src/components/ui/badge.tsx"
+          ],
+          "patterns_from": [],
+          "verification": {
+            "type": "command",
+            "command": "ls src/components/ui/",
+            "expected": "button.tsx, card.tsx, table.tsx, badge.tsx files exist"
+          },
+          "status": "completed",
+          "notes": "Successfully initialized shadcn/ui with all required components. Added button, card, table, badge, separator, and tabs components. Updated tailwind.config.ts and globals.css with shadcn configuration. All TypeScript types compile successfully.",
+          "updated_at": "2025-12-28T22:44:02.825126+00:00"
+        },
+        {
+          "id": "subtask-1-3",
+          "description": "Install simple-git dependency and create .env.local with PROJECTS_PATH",
+          "service": "dashboard",
+          "files_to_modify": [
+            "package.json"
+          ],
+          "files_to_create": [
+            ".env.local",
+            ".env.example"
+          ],
+          "patterns_from": [],
+          "verification": {
+            "type": "command",
+            "command": "grep simple-git package.json && cat .env.local",
+            "expected": "simple-git in dependencies and PROJECTS_PATH configured"
+          },
+          "status": "completed",
+          "notes": "Added simple-git ^3.27.0 to package.json dependencies. Created .env.local with PROJECTS_PATH=/Users/jmcconocha/Documents/Projects. Created .env.example as template. Updated .gitignore to track .env.example while keeping .env.local ignored.",
+          "updated_at": "2025-12-28T22:45:57.766206+00:00"
+        }
+      ]
+    },
+    {
+      "id": "phase-2-core-lib",
+      "name": "Core Library",
+      "type": "implementation",
+      "description": "Build TypeScript types and core utilities for project scanning and Git integration",
+      "depends_on": [
+        "phase-1-setup"
+      ],
+      "parallel_safe": false,
+      "subtasks": [
+        {
+          "id": "subtask-2-1",
+          "description": "Create TypeScript interfaces for Project, GitInfo, and ProjectStatus types",
+          "service": "dashboard",
+          "files_to_modify": [],
+          "files_to_create": [
+            "src/types/project.ts"
+          ],
+          "patterns_from": [],
+          "verification": {
+            "type": "command",
+            "command": "npx tsc --noEmit src/types/project.ts",
+            "expected": "No TypeScript errors"
+          },
+          "status": "completed",
+          "notes": "Created src/types/project.ts with TypeScript interfaces for Project, GitInfo, ProjectStatus types. Also added helper types: ProjectSummary, ProjectListResponse, ProjectDetailResponse, and ProjectErrorResponse. TypeScript compiles without errors. Commit: f7b573c",
+          "updated_at": "2025-12-28T22:47:33.919226+00:00"
+        },
+        {
+          "id": "subtask-2-2",
+          "description": "Create project-scanner.ts with scanDirectory function using fs/promises",
+          "service": "dashboard",
+          "files_to_modify": [],
+          "files_to_create": [
+            "src/lib/project-scanner.ts"
+          ],
+          "patterns_from": [],
+          "verification": {
+            "type": "command",
+            "command": "npx tsc --noEmit src/lib/project-scanner.ts",
+            "expected": "No TypeScript errors"
+          },
+          "status": "completed",
+          "notes": "Created src/lib/project-scanner.ts with scanDirectory function using fs/promises. Includes: scanDirectory, scanProjects, getProjectsPath, filterSuccessfulScans, filterScanErrors functions. TypeScript compiles without errors. Commit: 97a9da1",
+          "updated_at": "2025-12-28T22:50:39.400638+00:00"
+        },
+        {
+          "id": "subtask-2-3",
+          "description": "Create git-utils.ts with getGitStatus function using simple-git",
+          "service": "dashboard",
+          "files_to_modify": [],
+          "files_to_create": [
+            "src/lib/git-utils.ts"
+          ],
+          "patterns_from": [],
+          "verification": {
+            "type": "command",
+            "command": "npx tsc --noEmit src/lib/git-utils.ts",
+            "expected": "No TypeScript errors"
+          },
+          "status": "completed",
+          "notes": "Created src/lib/git-utils.ts with getGitStatus function using simple-git. Includes: getGitStatus, isGitRepository, determineProjectStatus, getGitStatusSummary, enrichProjectsWithGitInfo functions. TypeScript compiles without errors. Commit: e064208",
+          "updated_at": "2025-12-28T22:52:47.281639+00:00"
+        }
+      ]
+    },
+    {
+      "id": "phase-3-api",
+      "name": "API Routes",
+      "type": "implementation",
+      "description": "Build Next.js 15 API routes for fetching project data",
+      "depends_on": [
+        "phase-2-core-lib"
+      ],
+      "parallel_safe": true,
+      "subtasks": [
+        {
+          "id": "subtask-3-1",
+          "description": "Create GET /api/projects route to fetch all projects with status",
+          "service": "dashboard",
+          "files_to_modify": [],
+          "files_to_create": [
+            "src/app/api/projects/route.ts"
+          ],
+          "patterns_from": [],
+          "verification": {
+            "type": "api",
+            "method": "GET",
+            "url": "http://localhost:3000/api/projects",
+            "expected_status": 200
+          },
+          "status": "completed",
+          "notes": "Created GET /api/projects route that scans projects directory, enriches with Git info, and returns sorted projects with proper error handling. Build succeeds without errors. API returns HTTP 200 with valid ProjectListResponse. Commit: c96ccf9",
+          "updated_at": "2025-12-28T22:56:02.602673+00:00"
+        },
+        {
+          "id": "subtask-3-2",
+          "description": "Create GET /api/projects/[id] route to fetch single project details",
+          "service": "dashboard",
+          "files_to_modify": [],
+          "files_to_create": [
+            "src/app/api/projects/[id]/route.ts"
+          ],
+          "patterns_from": [],
+          "verification": {
+            "type": "api",
+            "method": "GET",
+            "url": "http://localhost:3000/api/projects/test-project",
+            "expected_status": 200
+          },
+          "status": "completed",
+          "notes": "Created GET /api/projects/[id] route that fetches single project by ID with Git info enrichment. Handles 404 for non-existent projects. Build succeeds without errors. API returns HTTP 200 with valid ProjectDetailResponse. Verified with curl testing. Commit: ab1dac9",
+          "updated_at": "2025-12-28T22:59:12.088208+00:00"
+        },
+        {
+          "id": "subtask-3-3",
+          "description": "Create server action for refreshing project list",
+          "service": "dashboard",
+          "files_to_modify": [],
+          "files_to_create": [
+            "src/lib/actions.ts"
+          ],
+          "patterns_from": [],
+          "verification": {
+            "type": "command",
+            "command": "npx tsc --noEmit src/lib/actions.ts",
+            "expected": "No TypeScript errors"
+          },
+          "status": "completed",
+          "notes": "Created src/lib/actions.ts with server actions for project management. Includes: refreshProjects() for rescanning projects directory and revalidating cache, getProjectsFresh() for fetching fresh project data without caching, and refreshProject() for revalidating cache for a single project. TypeScript compiles without errors. Commit: 798eda1",
+          "updated_at": "2025-12-28T23:02:01.249188+00:00"
+        }
+      ]
+    },
+    {
+      "id": "phase-4-components",
+      "name": "UI Components",
+      "type": "implementation",
+      "description": "Build reusable React components for project display",
+      "depends_on": [
+        "phase-2-core-lib"
+      ],
+      "parallel_safe": true,
+      "subtasks": [
+        {
+          "id": "subtask-4-1",
+          "description": "Create StatusBadge component with variants for active, stale, clean, dirty, unknown",
+          "service": "dashboard",
+          "files_to_modify": [],
+          "files_to_create": [
+            "src/components/status-badge.tsx"
+          ],
+          "patterns_from": [],
+          "verification": {
+            "type": "command",
+            "command": "npx tsc --noEmit src/components/status-badge.tsx",
+            "expected": "No TypeScript errors"
+          },
+          "status": "completed",
+          "notes": "Created StatusBadge component with variants for active, stale, clean, dirty, unknown statuses. Features semantic colors (green=active, amber=stale, blue=clean, red=dirty, gray=unknown), dark mode support, optional icons/labels, and accessibility attributes. Follows shadcn/ui patterns with cva for variants. Commit: 7bacecd",
+          "updated_at": "2025-12-28T23:03:57.828663+00:00"
+        },
+        {
+          "id": "subtask-4-2",
+          "description": "Create ProjectCard component for grid/list display of projects",
+          "service": "dashboard",
+          "files_to_modify": [],
+          "files_to_create": [
+            "src/components/project-card.tsx"
+          ],
+          "patterns_from": [],
+          "verification": {
+            "type": "command",
+            "command": "npx tsc --noEmit src/components/project-card.tsx",
+            "expected": "No TypeScript errors"
+          },
+          "status": "completed",
+          "notes": "Created ProjectCard component with grid/list view modes, status badge integration, Git info display (branch, dirty state), relative time formatting, package.json/README indicators, and accessible clickable cards linking to detail pages. TypeScript compiles without errors. Build succeeds. Commit: ed859fe",
+          "updated_at": "2025-12-28T23:06:33.223625+00:00"
+        },
+        {
+          "id": "subtask-4-3",
+          "description": "Create ProjectTable component for tabular project listing",
+          "service": "dashboard",
+          "files_to_modify": [],
+          "files_to_create": [
+            "src/components/project-table.tsx"
+          ],
+          "patterns_from": [],
+          "verification": {
+            "type": "command",
+            "command": "npx tsc --noEmit src/components/project-table.tsx",
+            "expected": "No TypeScript errors"
+          },
+          "status": "completed",
+          "notes": "Created ProjectTable component with tabular project display. Features: status badges, Git branch display, change counts (with amber badge), relative time formatting, package.json/README indicators, empty state handling, clickable rows with links to detail pages. Uses React.forwardRef pattern and shadcn/ui Table components. TypeScript compiles without errors. Build succeeds. Commit: d2931f9",
+          "updated_at": "2025-12-28T23:09:03.317785+00:00"
+        },
+        {
+          "id": "subtask-4-4",
+          "description": "Create RefreshButton component with loading state",
+          "service": "dashboard",
+          "files_to_modify": [],
+          "files_to_create": [
+            "src/components/refresh-button.tsx"
+          ],
+          "patterns_from": [],
+          "verification": {
+            "type": "command",
+            "command": "npx tsc --noEmit src/components/refresh-button.tsx",
+            "expected": "No TypeScript errors"
+          },
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": "phase-5-pages",
+      "name": "Dashboard Pages",
+      "type": "implementation",
+      "description": "Build the main dashboard and detail view pages",
+      "depends_on": [
+        "phase-3-api",
+        "phase-4-components"
+      ],
+      "parallel_safe": false,
+      "subtasks": [
+        {
+          "id": "subtask-5-1",
+          "description": "Update layout.tsx with proper metadata and global styles",
+          "service": "dashboard",
+          "files_to_modify": [
+            "src/app/layout.tsx"
+          ],
+          "files_to_create": [],
+          "patterns_from": [],
+          "verification": {
+            "type": "command",
+            "command": "npx tsc --noEmit src/app/layout.tsx",
+            "expected": "No TypeScript errors"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-5-2",
+          "description": "Create main dashboard page with project grid and at-a-glance view",
+          "service": "dashboard",
+          "files_to_modify": [
+            "src/app/page.tsx"
+          ],
+          "files_to_create": [],
+          "patterns_from": [],
+          "verification": {
+            "type": "browser",
+            "url": "http://localhost:3000",
+            "checks": [
+              "Projects grid loads",
+              "Status badges visible",
+              "No console errors"
+            ]
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-5-3",
+          "description": "Create project detail page with Git info and Open in Finder button",
+          "service": "dashboard",
+          "files_to_modify": [],
+          "files_to_create": [
+            "src/app/projects/[id]/page.tsx"
+          ],
+          "patterns_from": [],
+          "verification": {
+            "type": "browser",
+            "url": "http://localhost:3000/projects/test-project",
+            "checks": [
+              "Project details load",
+              "Git info displayed",
+              "Open button visible"
+            ]
+          },
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": "phase-6-integration",
+      "name": "Integration & Polish",
+      "type": "integration",
+      "description": "Wire everything together, add error handling, and verify end-to-end flow",
+      "depends_on": [
+        "phase-5-pages"
+      ],
+      "parallel_safe": false,
+      "subtasks": [
+        {
+          "id": "subtask-6-1",
+          "description": "Add error boundary for graceful error handling",
+          "service": "dashboard",
+          "files_to_modify": [],
+          "files_to_create": [
+            "src/components/error-boundary.tsx",
+            "src/app/error.tsx"
+          ],
+          "patterns_from": [],
+          "verification": {
+            "type": "command",
+            "command": "npx tsc --noEmit src/app/error.tsx",
+            "expected": "No TypeScript errors"
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-6-2",
+          "description": "Add loading states with Suspense and loading.tsx",
+          "service": "dashboard",
+          "files_to_modify": [],
+          "files_to_create": [
+            "src/app/loading.tsx",
+            "src/app/projects/[id]/loading.tsx"
+          ],
+          "patterns_from": [],
+          "verification": {
+            "type": "browser",
+            "url": "http://localhost:3000",
+            "checks": [
+              "Loading skeleton appears before data loads"
+            ]
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-6-3",
+          "description": "Verify end-to-end flow: dashboard loads, navigate to detail, open in Finder works",
+          "all_services": true,
+          "files_to_modify": [],
+          "files_to_create": [],
+          "patterns_from": [],
+          "verification": {
+            "type": "e2e",
+            "steps": [
+              "Load dashboard at http://localhost:3000",
+              "Verify all projects from ~/Documents/Projects are displayed",
+              "Click on a project card to navigate to detail view",
+              "Verify Git information is displayed correctly",
+              "Click Open in Finder button and verify folder opens",
+              "Navigate back to dashboard",
+              "Click Refresh button and verify projects reload"
+            ]
+          },
+          "status": "pending"
+        },
+        {
+          "id": "subtask-6-4",
+          "description": "Run TypeScript type check and fix any type errors",
+          "service": "dashboard",
+          "files_to_modify": [],
+          "files_to_create": [],
+          "patterns_from": [],
+          "verification": {
+            "type": "command",
+            "command": "npm run build",
+            "expected": "Build completes without errors"
+          },
+          "status": "pending"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total_phases": 6,
+    "total_subtasks": 17,
+    "services_involved": [
+      "dashboard"
+    ],
+    "parallelism": {
+      "max_parallel_phases": 2,
+      "parallel_groups": [
+        {
+          "phases": [
+            "phase-3-api",
+            "phase-4-components"
+          ],
+          "reason": "Both depend only on phase-2-core-lib, no overlapping files"
+        }
+      ],
+      "recommended_workers": 1,
+      "speedup_estimate": "Sequential execution recommended for greenfield project to maintain code coherence"
+    },
+    "startup_command": "source auto-claude/.venv/bin/activate && python auto-claude/run.py --spec 001 --parallel 1"
+  },
+  "verification_strategy": {
+    "risk_level": "medium",
+    "skip_validation": false,
+    "test_creation_phase": "post_implementation",
+    "test_types_required": [
+      "unit",
+      "integration"
+    ],
+    "security_scanning_required": false,
+    "staging_deployment_required": false,
+    "acceptance_criteria": [
+      "Dashboard loads at http://localhost:3000",
+      "All projects from ~/Documents/Projects are displayed",
+      "Status badges show correct state for each project",
+      "Detail view shows Git information",
+      "Open in Finder button works",
+      "Refresh button updates project list",
+      "No console errors in browser or server",
+      "TypeScript compiles without errors"
+    ],
+    "verification_steps": [
+      {
+        "name": "TypeScript Check",
+        "command": "npx tsc --noEmit",
+        "expected_outcome": "No type errors",
+        "type": "lint",
+        "required": true,
+        "blocking": true
+      },
+      {
+        "name": "Build Check",
+        "command": "npm run build",
+        "expected_outcome": "Build succeeds",
+        "type": "build",
+        "required": true,
+        "blocking": true
+      },
+      {
+        "name": "API Endpoint - Projects List",
+        "command": "curl -s http://localhost:3000/api/projects | head -c 200",
+        "expected_outcome": "Returns JSON array of projects",
+        "type": "api",
+        "required": true,
+        "blocking": false
+      }
+    ],
+    "reasoning": "Medium risk greenfield project requires TypeScript validation and build verification. Unit and integration tests to be added after core implementation."
+  },
+  "qa_acceptance": {
+    "unit_tests": {
+      "required": true,
+      "commands": [
+        "npm test"
+      ],
+      "minimum_coverage": null
+    },
+    "integration_tests": {
+      "required": true,
+      "commands": [
+        "npm run test:integration"
+      ],
+      "services_to_test": [
+        "dashboard"
+      ]
+    },
+    "e2e_tests": {
+      "required": false,
+      "commands": [],
+      "flows": []
+    },
+    "browser_verification": {
+      "required": true,
+      "pages": [
+        {
+          "url": "http://localhost:3000",
+          "checks": [
+            "renders",
+            "projects-visible",
+            "no-console-errors"
+          ]
+        },
+        {
+          "url": "http://localhost:3000/projects/test-project",
+          "checks": [
+            "renders",
+            "git-info-visible",
+            "open-button-visible"
+          ]
+        }
+      ]
+    },
+    "database_verification": {
+      "required": false,
+      "checks": []
+    },
+    "api_verification": {
+      "required": true,
+      "endpoints": [
+        {
+          "method": "GET",
+          "url": "/api/projects",
+          "expected_status": 200
+        },
+        {
+          "method": "GET",
+          "url": "/api/projects/existing-project",
+          "expected_status": 200
+        },
+        {
+          "method": "GET",
+          "url": "/api/projects/non-existent",
+          "expected_status": 404
+        }
+      ]
+    }
+  },
+  "qa_signoff": null,
+  "last_updated": "2025-12-28T23:09:03.317792+00:00"
+}

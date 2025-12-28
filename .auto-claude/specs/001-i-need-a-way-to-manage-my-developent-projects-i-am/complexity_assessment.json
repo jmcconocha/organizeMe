@@ -1,0 +1,85 @@
+{
+  "complexity": "standard",
+  "workflow_type": "feature",
+  "confidence": 0.85,
+  "reasoning": "Greenfield web application feature requiring UI, data layer, and file system integration. Multiple files needed but contained to single service. No external API integrations - just local file system scanning. Needs research phase for tech stack decisions and project state detection strategies.",
+
+  "analysis": {
+    "scope": {
+      "estimated_files": 12,
+      "estimated_services": 1,
+      "is_cross_cutting": false,
+      "notes": "Web-based dashboard with file system integration. Includes frontend components (list view, detail view), backend/API layer for file scanning, and data persistence layer for project metadata."
+    },
+    "integrations": {
+      "external_services": [],
+      "new_dependencies": ["web-framework", "file-system-utils"],
+      "research_needed": true,
+      "notes": "No external API integrations. Dependencies will be chosen during research phase - likely a modern web framework (React, Vue, or Svelte) with Node.js backend for file system access."
+    },
+    "infrastructure": {
+      "docker_changes": false,
+      "database_changes": false,
+      "config_changes": true,
+      "notes": "Local development app - no Docker needed. Can use JSON files or SQLite for project metadata storage. Need configuration for projects folder path."
+    },
+    "knowledge": {
+      "patterns_exist": false,
+      "research_required": true,
+      "unfamiliar_tech": [],
+      "notes": "Greenfield project with empty web folder. Need to establish patterns for: project state detection (git status, TODOs, build status), UI component structure, and data persistence approach."
+    },
+    "risk": {
+      "level": "low",
+      "concerns": [
+        "Project state detection accuracy",
+        "File system permissions across different projects",
+        "Performance when scanning many projects"
+      ],
+      "notes": "Read-only file system access limits risk. Main challenge is reliably determining project completion states and next actions."
+    }
+  },
+
+  "recommended_phases": [
+    "discovery",
+    "requirements",
+    "research",
+    "context",
+    "spec_writing",
+    "planning",
+    "validation"
+  ],
+
+  "flags": {
+    "needs_research": true,
+    "needs_self_critique": false,
+    "needs_infrastructure_setup": false
+  },
+
+  "validation_recommendations": {
+    "risk_level": "medium",
+    "skip_validation": false,
+    "minimal_mode": false,
+    "test_types_required": ["unit", "integration"],
+    "security_scan_required": false,
+    "staging_deployment_required": false,
+    "reasoning": "New web application requires unit tests for project state detection logic and integration tests for file system scanning. No security-sensitive operations - just read-only local file access. No external services requiring staging deployment."
+  },
+
+  "greenfield_considerations": {
+    "tech_stack_decisions_needed": [
+      "Frontend framework (React, Vue, Svelte, or vanilla)",
+      "Backend approach (Node.js API, Electron, or browser-based)",
+      "Data persistence (JSON files, SQLite, or browser localStorage)",
+      "Project state detection strategy (git status, file markers, manual tracking)"
+    ],
+    "architectural_patterns_to_establish": [
+      "Component structure for views (at-a-glance vs detail)",
+      "Project scanning and indexing approach",
+      "Navigation mechanism to open projects (file://, terminal commands, IDE integration)",
+      "Refresh/update strategy for project states"
+    ]
+  },
+
+  "created_at": "2024-12-28T17:25:00Z"
+}

@@ -1,0 +1,34 @@
+{
+  "project_root": "/Users/jmcconocha/Documents/Projects/organizeMe",
+  "project_type": "single",
+  "services": {
+    "dashboard": {
+      "path": ".",
+      "tech_stack": ["typescript", "nextjs15", "tailwindcss", "shadcn-ui", "simple-git"],
+      "port": 3000,
+      "dev_command": "npm run dev",
+      "test_command": "npm test",
+      "build_command": "npm run build"
+    }
+  },
+  "infrastructure": {
+    "docker": false,
+    "database": null,
+    "ci_cd": false
+  },
+  "conventions": {
+    "linter": "eslint",
+    "formatter": "prettier",
+    "testing": "jest",
+    "type_checking": "typescript"
+  },
+  "environment": {
+    "node_version": "20.9+",
+    "package_manager": "npm"
+  },
+  "notes": {
+    "greenfield": true,
+    "existing_structure": "Empty web/ placeholder directories exist but will be replaced with Next.js structure",
+    "projects_path": "/Users/jmcconocha/Documents/Projects"
+  }
+}

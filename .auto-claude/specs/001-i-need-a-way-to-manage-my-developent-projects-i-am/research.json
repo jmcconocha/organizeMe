@@ -1,0 +1,406 @@
+{
+  "integrations_researched": [
+    {
+      "name": "Next.js",
+      "type": "framework",
+      "description": "Full-stack React framework for building the web dashboard with both frontend UI and backend API routes",
+      "verified_package": {
+        "name": "next",
+        "install_command": "npx create-next-app@latest --yes",
+        "version": "15+",
+        "verified": true
+      },
+      "api_patterns": {
+        "imports": [
+          "import { NextRequest, NextResponse } from 'next/server'",
+          "import { revalidatePath } from 'next/cache'",
+          "import { redirect } from 'next/navigation'"
+        ],
+        "initialization": "npx create-next-app@latest my-app --yes (includes TypeScript, Tailwind CSS, ESLint, App Router)",
+        "key_functions": [
+          "GET(request: NextRequest) - Route handler for GET requests",
+          "POST(request: NextRequest) - Route handler for POST requests",
+          "'use server' directive - Server actions for data mutations",
+          "revalidatePath('/path') - Cache revalidation",
+          "redirect('/path') - Server-side redirects"
+        ],
+        "verified_against": "Next.js official documentation (nextjs.org/docs)"
+      },
+      "configuration": {
+        "env_vars": [],
+        "config_files": ["next.config.js", "tsconfig.json"],
+        "dependencies": ["react", "react-dom"]
+      },
+      "infrastructure": {
+        "requires_docker": false,
+        "ports": [3000],
+        "notes": "Runs on localhost:3000 by default"
+      },
+      "gotchas": [
+        "Node.js 20.9+ required",
+        "App Router is the default (not Pages Router)",
+        "context.params is now a Promise in v15+",
+        "Server Actions use POST method and 'use server' directive"
+      ],
+      "research_sources": [
+        "https://nextjs.org/docs/getting-started/installation",
+        "https://nextjs.org/docs/app/building-your-application/routing/route-handlers"
+      ]
+    },
+    {
+      "name": "React",
+      "type": "library",
+      "description": "UI library for building component-based interfaces (bundled with Next.js)",
+      "verified_package": {
+        "name": "react",
+        "install_command": "Bundled with Next.js",
+        "version": "19+",
+        "verified": true
+      },
+      "api_patterns": {
+        "imports": [
+          "import { useState, useEffect } from 'react'",
+          "import { useTransition, useDeferredValue } from 'react'",
+          "import { useActionState, useOptimistic } from 'react'"
+        ],
+        "initialization": "Automatically configured with Next.js",
+        "key_functions": [
+          "useState(initialValue) - Component state management",
+          "useEffect(callback, deps) - Side effects handling",
+          "useTransition() - Non-blocking state updates",
+          "useActionState(action, initialState) - Form/action state management",
+          "memo(Component) - Memoization for performance"
+        ],
+        "verified_against": "React official documentation (react.dev)"
+      },
+      "configuration": {
+        "env_vars": [],
+        "config_files": [],
+        "dependencies": ["react-dom"]
+      },
+      "infrastructure": {
+        "requires_docker": false,
+        "notes": "Client-side rendering with server components support in Next.js"
+      },
+      "gotchas": [
+        "Components must be pure (same input = same output)",
+        "Follow Rules of Hooks (only call in component body)",
+        "'use client' directive needed for client components in Next.js App Router"
+      ],
+      "research_sources": [
+        "https://react.dev/reference/react"
+      ]
+    },
+    {
+      "name": "Tailwind CSS",
+      "type": "library",
+      "description": "Utility-first CSS framework for styling the dashboard",
+      "verified_package": {
+        "name": "tailwindcss",
+        "install_command": "Bundled with Next.js --yes flag",
+        "version": "4+",
+        "verified": true
+      },
+      "api_patterns": {
+        "imports": [
+          "@import 'tailwindcss' in CSS file"
+        ],
+        "initialization": "Pre-configured with Next.js create-next-app --yes",
+        "key_functions": [
+          "Utility classes: flex, grid, p-4, m-2, text-lg, bg-blue-500",
+          "Responsive: sm:, md:, lg:, xl: prefixes",
+          "Dark mode: dark: prefix",
+          "Hover states: hover:, focus:, active: prefixes"
+        ],
+        "verified_against": "Tailwind CSS documentation (tailwindcss.com)"
+      },
+      "configuration": {
+        "env_vars": [],
+        "config_files": ["tailwind.config.ts"],
+        "dependencies": ["postcss", "autoprefixer"]
+      },
+      "infrastructure": {
+        "requires_docker": false,
+        "notes": "Build-time CSS generation, no runtime overhead"
+      },
+      "gotchas": [
+        "Tailwind v4 uses @import 'tailwindcss' instead of @tailwind directives",
+        "Configure content paths in tailwind.config.ts for purging",
+        "Use CSS-in-JS or inline styles for dynamic values"
+      ],
+      "research_sources": [
+        "https://tailwindcss.com/docs/installation"
+      ]
+    },
+    {
+      "name": "Node.js fs Module",
+      "type": "library",
+      "description": "Built-in Node.js module for file system operations - scanning project directories",
+      "verified_package": {
+        "name": "node:fs",
+        "install_command": "Built-in (no installation needed)",
+        "version": "Node.js 20.9+",
+        "verified": true
+      },
+      "api_patterns": {
+        "imports": [
+          "import { readdir, stat, watch } from 'node:fs/promises'",
+          "import { readdirSync, statSync } from 'node:fs'"
+        ],
+        "initialization": "No initialization needed - built into Node.js",
+        "key_functions": [
+          "readdir(path, { withFileTypes: true }) - List directory contents with Dirent objects",
+          "stat(path) - Get file/directory stats (size, mtime, isDirectory)",
+          "watch(path, { recursive: true }) - Watch for file changes",
+          "opendir(path) - Open directory for async iteration"
+        ],
+        "verified_against": "Node.js v25 documentation (nodejs.org/api/fs.html)"
+      },
+      "configuration": {
+        "env_vars": [],
+        "config_files": [],
+        "dependencies": []
+      },
+      "infrastructure": {
+        "requires_docker": false,
+        "notes": "Built-in module, works in Node.js environment (Next.js API routes)"
+      },
+      "gotchas": [
+        "Promise-based APIs recommended for non-blocking operations",
+        "Use withFileTypes option to distinguish files from directories",
+        "fs.watch may have platform-specific behavior",
+        "Cannot use in client components - only server-side (API routes, Server Actions)"
+      ],
+      "research_sources": [
+        "https://nodejs.org/api/fs.html"
+      ]
+    },
+    {
+      "name": "simple-git",
+      "type": "library",
+      "description": "Git operations library for detecting project git status, branches, and recent commits",
+      "verified_package": {
+        "name": "simple-git",
+        "install_command": "npm install simple-git",
+        "version": "latest",
+        "verified": false,
+        "verification_note": "Package name verified from npm registry, API patterns from established usage"
+      },
+      "api_patterns": {
+        "imports": [
+          "import simpleGit from 'simple-git'"
+        ],
+        "initialization": "const git = simpleGit('/path/to/repo')",
+        "key_functions": [
+          "git.status() - Get working directory status (modified, staged, untracked files)",
+          "git.log({ maxCount: 10 }) - Get recent commit history",
+          "git.branch() - Get branch information",
+          "git.remote(['get-url', 'origin']) - Get remote URL",
+          "git.checkIsRepo() - Verify if directory is a git repository"
+        ],
+        "verified_against": "GitHub repository steveukx/git-js (established patterns)"
+      },
+      "configuration": {
+        "env_vars": [],
+        "config_files": [],
+        "dependencies": []
+      },
+      "infrastructure": {
+        "requires_docker": false,
+        "notes": "Requires git installed on system"
+      },
+      "gotchas": [
+        "Requires git CLI installed on the host system",
+        "Must check if directory is a git repo before operations",
+        "Some operations may fail on empty repositories",
+        "All methods return Promises"
+      ],
+      "research_sources": [
+        "https://github.com/steveukx/git-js",
+        "npm registry: simple-git"
+      ]
+    },
+    {
+      "name": "shadcn/ui",
+      "type": "library",
+      "description": "Accessible, customizable React component library for building the dashboard UI",
+      "verified_package": {
+        "name": "shadcn-ui",
+        "install_command": "npx shadcn@latest init",
+        "version": "latest",
+        "verified": false,
+        "verification_note": "CLI-based component installation, not traditional npm package"
+      },
+      "api_patterns": {
+        "imports": [
+          "import { Button } from '@/components/ui/button'",
+          "import { Card, CardContent, CardHeader } from '@/components/ui/card'",
+          "import { Table, TableBody, TableCell, TableHead } from '@/components/ui/table'"
+        ],
+        "initialization": "npx shadcn@latest init (then add components: npx shadcn@latest add button card table)",
+        "key_functions": [
+          "Button variants: default, destructive, outline, secondary, ghost, link",
+          "Card components: Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter",
+          "Table components: Table, TableHeader, TableBody, TableRow, TableHead, TableCell",
+          "Badge for status indicators"
+        ],
+        "verified_against": "shadcn/ui documentation patterns"
+      },
+      "configuration": {
+        "env_vars": [],
+        "config_files": ["components.json"],
+        "dependencies": ["tailwindcss", "@radix-ui/react-*", "class-variance-authority", "clsx", "tailwind-merge"]
+      },
+      "infrastructure": {
+        "requires_docker": false,
+        "notes": "Components are copied to your project, fully customizable"
+      },
+      "gotchas": [
+        "Components are installed into your codebase (not npm dependencies)",
+        "Requires Tailwind CSS to be configured",
+        "Each component may have Radix UI peer dependencies",
+        "Run 'npx shadcn@latest add [component]' to add specific components"
+      ],
+      "research_sources": [
+        "https://ui.shadcn.com/docs"
+      ]
+    },
+    {
+      "name": "Lucide React",
+      "type": "library",
+      "description": "Icon library for visual indicators (used with shadcn/ui)",
+      "verified_package": {
+        "name": "lucide-react",
+        "install_command": "npm install lucide-react",
+        "version": "latest",
+        "verified": false,
+        "verification_note": "Commonly used with shadcn/ui, well-established package"
+      },
+      "api_patterns": {
+        "imports": [
+          "import { Folder, GitBranch, Clock, CheckCircle, AlertCircle } from 'lucide-react'"
+        ],
+        "initialization": "No initialization needed - import icons directly",
+        "key_functions": [
+          "Icons as React components: <Folder className='w-4 h-4' />",
+          "Size via className: w-4 h-4, w-6 h-6, etc.",
+          "Color via className: text-green-500, text-red-500"
+        ],
+        "verified_against": "Lucide documentation patterns"
+      },
+      "configuration": {
+        "env_vars": [],
+        "config_files": [],
+        "dependencies": []
+      },
+      "infrastructure": {
+        "requires_docker": false,
+        "notes": "Tree-shakeable - only imports used icons"
+      },
+      "gotchas": [
+        "Import only icons you need for smaller bundle size",
+        "Use className for sizing (not size prop in all cases)",
+        "Compatible with Tailwind CSS utility classes"
+      ],
+      "research_sources": [
+        "https://lucide.dev/guide/packages/lucide-react"
+      ]
+    }
+  ],
+  "unverified_claims": [
+    {
+      "claim": "simple-git API signatures",
+      "reason": "Could not access official documentation directly, relying on established usage patterns",
+      "risk_level": "low",
+      "mitigation": "API is well-documented in GitHub README, patterns are stable"
+    },
+    {
+      "claim": "shadcn/ui component structure",
+      "reason": "Documentation fetch partially blocked, relying on established patterns",
+      "risk_level": "low",
+      "mitigation": "CLI provides interactive setup with proper configuration"
+    }
+  ],
+  "recommendations": [
+    {
+      "recommendation": "Use Next.js App Router with TypeScript",
+      "reason": "Provides both frontend and backend in one project with type safety. Server Actions eliminate need for separate API layer for simple operations."
+    },
+    {
+      "recommendation": "Use JSON file for project metadata persistence",
+      "reason": "Simpler than SQLite for this use case. Can store in project root as projects.json. No database setup required."
+    },
+    {
+      "recommendation": "Detect project state from git status and file markers",
+      "reason": "Use simple-git for git status (uncommitted changes, branch info). Check for common markers: package.json, README.md, .gitignore, TODO files."
+    },
+    {
+      "recommendation": "Use shadcn/ui Card component for project cards",
+      "reason": "Provides consistent, accessible UI. Card component with Badge for status works well for at-a-glance view."
+    },
+    {
+      "recommendation": "Configure projects directory path via environment variable",
+      "reason": "PROJECTS_DIR env var allows flexibility. Default to ~/Documents/Projects if not set."
+    },
+    {
+      "recommendation": "Consider file:// links or VS Code URI for project navigation",
+      "reason": "Browser can open file:// links (limited by security). VS Code URI (vscode://file/path) opens directly in editor."
+    }
+  ],
+  "tech_stack_summary": {
+    "frontend": {
+      "framework": "Next.js 15+ (App Router)",
+      "ui_library": "React 19+",
+      "styling": "Tailwind CSS 4+",
+      "components": "shadcn/ui",
+      "icons": "Lucide React"
+    },
+    "backend": {
+      "runtime": "Node.js 20.9+",
+      "framework": "Next.js API Routes / Server Actions",
+      "file_system": "node:fs (built-in)",
+      "git_integration": "simple-git"
+    },
+    "data_persistence": {
+      "type": "JSON file",
+      "file": "data/projects.json",
+      "notes": "Simple file-based storage, no database needed"
+    }
+  },
+  "project_detection_strategy": {
+    "methods": [
+      {
+        "name": "Git Status Detection",
+        "description": "Use simple-git to check for uncommitted changes, branch info, last commit date",
+        "indicators": {
+          "has_uncommitted_changes": "Project has active work",
+          "last_commit_age": "Stale if > 30 days",
+          "branch_name": "Feature branch suggests in-progress work"
+        }
+      },
+      {
+        "name": "File Marker Detection",
+        "description": "Check for presence of key files to determine project type and state",
+        "markers": {
+          "package.json": "Node.js project",
+          "requirements.txt": "Python project",
+          "Cargo.toml": "Rust project",
+          "go.mod": "Go project",
+          "README.md": "Has documentation",
+          "TODO.md": "Has explicit todos",
+          ".env.example": "Needs environment setup"
+        }
+      },
+      {
+        "name": "Build/Test Status",
+        "description": "Check for presence of build artifacts or test results",
+        "markers": {
+          "node_modules": "Dependencies installed",
+          "dist/build": "Has been built",
+          ".next": "Next.js build exists"
+        }
+      }
+    ]
+  },
+  "created_at": "2024-12-28T17:45:00Z"
+}

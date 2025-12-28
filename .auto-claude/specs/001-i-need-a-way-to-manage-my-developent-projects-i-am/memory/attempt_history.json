@@ -1,0 +1,153 @@
+{
+  "subtasks": {
+    "subtask-1-1": {
+      "attempts": [
+        {
+          "session": 1,
+          "timestamp": "2025-12-28T17:39:12.741853",
+          "approach": "Implemented: Initialize Next.js 15 project with create-next-app",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-1-2": {
+      "attempts": [
+        {
+          "session": 2,
+          "timestamp": "2025-12-28T17:44:18.066884",
+          "approach": "Implemented: Initialize shadcn/ui and add required components (button, card, table, badge, separator, tabs)",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-1-3": {
+      "attempts": [
+        {
+          "session": 3,
+          "timestamp": "2025-12-28T17:46:04.779320",
+          "approach": "Implemented: Install simple-git dependency and create .env.local with PROJECTS_PATH",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-2-1": {
+      "attempts": [
+        {
+          "session": 4,
+          "timestamp": "2025-12-28T17:47:50.296554",
+          "approach": "Implemented: Create TypeScript interfaces for Project, GitInfo, and ProjectStatus types",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-2-2": {
+      "attempts": [
+        {
+          "session": 5,
+          "timestamp": "2025-12-28T17:50:48.697683",
+          "approach": "Implemented: Create project-scanner.ts with scanDirectory function using fs/promises",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-2-3": {
+      "attempts": [
+        {
+          "session": 6,
+          "timestamp": "2025-12-28T17:52:57.471677",
+          "approach": "Implemented: Create git-utils.ts with getGitStatus function using simple-git",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-3-1": {
+      "attempts": [
+        {
+          "session": 7,
+          "timestamp": "2025-12-28T17:56:11.615947",
+          "approach": "Implemented: Create GET /api/projects route to fetch all projects with status",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-3-2": {
+      "attempts": [
+        {
+          "session": 8,
+          "timestamp": "2025-12-28T17:59:29.415499",
+          "approach": "Implemented: Create GET /api/projects/[id] route to fetch single project details",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-3-3": {
+      "attempts": [
+        {
+          "session": 9,
+          "timestamp": "2025-12-28T18:02:12.777429",
+          "approach": "Implemented: Create server action for refreshing project list",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-4-1": {
+      "attempts": [
+        {
+          "session": 10,
+          "timestamp": "2025-12-28T18:04:05.678339",
+          "approach": "Implemented: Create StatusBadge component with variants for active, stale, clean, dirty, unknown",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-4-2": {
+      "attempts": [
+        {
+          "session": 11,
+          "timestamp": "2025-12-28T18:06:50.999858",
+          "approach": "Implemented: Create ProjectCard component for grid/list display of projects",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-4-3": {
+      "attempts": [
+        {
+          "session": 12,
+          "timestamp": "2025-12-28T18:09:12.973888",
+          "approach": "Implemented: Create ProjectTable component for tabular project listing",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    }
+  },
+  "stuck_subtasks": [],
+  "metadata": {
+    "created_at": "2025-12-28T17:34:50.311397",
+    "last_updated": "2025-12-28T18:09:12.973890"
+  }
+}

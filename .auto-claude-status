@@ -1,0 +1,25 @@
+{
+  "active": true,
+  "spec": "001-i-need-a-way-to-manage-my-developent-projects-i-am",
+  "state": "building",
+  "subtasks": {
+    "completed": 12,
+    "total": 20,
+    "in_progress": 1,
+    "failed": 0
+  },
+  "phase": {
+    "current": "UI Components",
+    "id": null,
+    "total": 4
+  },
+  "workers": {
+    "active": 0,
+    "max": 1
+  },
+  "session": {
+    "number": 13,
+    "started_at": "2025-12-28T17:34:50.311955"
+  },
+  "last_update": "2025-12-28T18:09:26.501958"
+}
