@@ -39,7 +39,22 @@
       "description": "ProjectTable component for tabular project listing. Features: status badges column, project name with description, Git branch display, uncommitted changes count (amber badge), relative time formatting, package.json/README indicators. Uses shadcn/ui Table components. Supports empty state, custom messages, and row click handlers. Clickable rows link to /projects/[id] detail pages.",
       "category": "component",
       "discovered_at": "2025-12-28T23:09:03.337137+00:00"
+    },
+    "src/app/projects/[id]/page.tsx": {
+      "description": "Project detail page with async Server Component using getProject function. Displays project metadata, Git info with branch/status/last commit, and features Open in Finder button via server action. Uses notFound() for non-existent projects.",
+      "category": "component",
+      "discovered_at": "2025-12-28T23:21:15.869344+00:00"
+    },
+    "src/app/projects/[id]/project-detail-actions.tsx": {
+      "description": "Client component for project detail actions. Provides Open in Finder button (calls openInFinder server action) and Refresh button (calls refreshProject). Features loading states and error handling.",
+      "category": "component",
+      "discovered_at": "2025-12-28T23:21:15.884764+00:00"
+    },
+    "src/app/loading.tsx": {
+      "description": "Next.js App Router loading.tsx files for route-level Suspense. Dashboard skeleton shows header, status cards, toolbar, and project grid. Project detail skeleton shows header, project metadata card, and git info card. Both include accessible aria-labels and sr-only text.",
+      "category": "pattern",
+      "discovered_at": "2025-12-28T23:26:51.869428+00:00"
     }
   },
-  "last_updated": "2025-12-28T23:09:03.337141+00:00"
+  "last_updated": "2025-12-28T23:26:51.869437+00:00"
 }

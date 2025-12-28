@@ -155,11 +155,71 @@
         }
       ],
       "status": "completed"
+    },
+    "subtask-5-1": {
+      "attempts": [
+        {
+          "session": 14,
+          "timestamp": "2025-12-28T18:12:37.853625",
+          "approach": "Implemented: Update layout.tsx with proper metadata and global styles",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-5-2": {
+      "attempts": [
+        {
+          "session": 15,
+          "timestamp": "2025-12-28T18:16:16.591667",
+          "approach": "Implemented: Create main dashboard page with project grid and at-a-glance view",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-5-3": {
+      "attempts": [
+        {
+          "session": 16,
+          "timestamp": "2025-12-28T18:21:26.510342",
+          "approach": "Implemented: Create project detail page with Git info and Open in Finder button",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-6-1": {
+      "attempts": [
+        {
+          "session": 17,
+          "timestamp": "2025-12-28T18:24:09.435243",
+          "approach": "Implemented: Add error boundary for graceful error handling",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
+    },
+    "subtask-6-2": {
+      "attempts": [
+        {
+          "session": 18,
+          "timestamp": "2025-12-28T18:27:02.108044",
+          "approach": "Implemented: Add loading states with Suspense and loading.tsx",
+          "success": true,
+          "error": null
+        }
+      ],
+      "status": "completed"
     }
   },
   "stuck_subtasks": [],
   "metadata": {
     "created_at": "2025-12-28T17:34:50.311397",
-    "last_updated": "2025-12-28T18:10:57.800506"
+    "last_updated": "2025-12-28T18:27:02.108047"
   }
 }
