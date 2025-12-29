@@ -604,26 +604,32 @@
   },
   "qa_signoff": {
     "status": "fixes_applied",
-    "qa_session": 3,
-    "fix_session": 0,
+    "qa_session": 6,
+    "fix_session": 1,
     "issues_found": [
       {
-        "title": "Server not running",
-        "description": "Development server was not running - QA reviewer could not access the app",
-        "fix": "Created init.sh startup script to easily start the development server"
+        "title": "Dashboard still not loading at localhost:3000",
+        "description": "Hung Next.js process on port 3000 consuming 123% CPU and not responding to requests",
+        "fix": "Enhanced init.sh script to automatically kill hung processes, clear Next.js cache, and restart server cleanly"
       }
     ],
     "issues_fixed": [
       {
-        "title": "Server not running - Added init.sh startup script",
-        "fix_commit": "pending"
+        "title": "Dashboard still not loading at localhost:3000",
+        "fix_type": "operational",
+        "description": "Updated init.sh script with automatic process cleanup, cache clearing, and better startup flow. User needs to run: ./init.sh"
       }
     ],
-    "tests_passed": {},
-    "timestamp": "2025-12-29T00:15:00.000000+00:00",
-    "ready_for_qa_revalidation": true
+    "tests_passed": {
+      "dashboard_loads": "pending",
+      "api_projects": "pending",
+      "project_detail": "pending"
+    },
+    "timestamp": "2025-12-29T01:12:00.000000+00:00",
+    "ready_for_qa_revalidation": true,
+    "user_action_required": "Run ./init.sh to restart the development server"
   },
-  "last_updated": "2025-12-29T00:02:08.790692+00:00",
+  "last_updated": "2025-12-29T01:05:00.000000+00:00",
   "qa_iteration_history": [
     {
       "iteration": 1,
@@ -649,11 +655,18 @@
       "timestamp": "2025-12-29T00:02:46.609454+00:00",
       "issues": [],
       "duration_seconds": 466.12
+    },
+    {
+      "iteration": 5,
+      "status": "approved",
+      "timestamp": "2025-12-29T00:36:49.113214+00:00",
+      "issues": [],
+      "duration_seconds": 568.19
     }
   ],
   "qa_stats": {
-    "total_iterations": 3,
-    "last_iteration": 3,
+    "total_iterations": 4,
+    "last_iteration": 5,
     "last_status": "approved",
     "issues_by_type": {
       "unknown": 1
