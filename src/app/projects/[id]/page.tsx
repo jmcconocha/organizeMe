@@ -9,9 +9,9 @@
 
 import { Suspense } from "react"
 import { notFound } from "next/navigation"
-import Link from "next/link"
 
 import { scanProjects, filterSuccessfulScans, getReadmeContent } from "@/lib/project-scanner"
+import { Header } from "@/components/header"
 import { getGitStatus, determineProjectStatus, getGitRemoteUrl } from "@/lib/git-utils"
 import type { Project } from "@/types/project"
 import { StatusBadge } from "@/components/status-badge"
@@ -105,29 +105,6 @@ function formatRelativeTime(date: Date): string {
     return diffInMinutes === 1 ? "1 minute ago" : `${diffInMinutes} minutes ago`
   }
   return "Just now"
-}
-
-/**
- * Back arrow icon.
- */
-function ArrowLeftIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth="2"
-      stroke="currentColor"
-      aria-hidden="true"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"
-      />
-    </svg>
-  )
 }
 
 /**
@@ -450,18 +427,12 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 
   return (
     <main className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeftIcon className="h-4 w-4" />
-            Back to Dashboard
-          </Link>
-        </div>
-      </header>
+      {/* Header with Theme Toggle */}
+      <Header
+        title="Project Details"
+        backHref="/"
+        backLabel="Back to Dashboard"
+      />
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-6">

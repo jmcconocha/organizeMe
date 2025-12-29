@@ -11,6 +11,7 @@ import { enrichProjectsWithGitInfo } from "@/lib/git-utils"
 import type { Project, ProjectStatus } from "@/types/project"
 import { DashboardContent } from "@/components/dashboard-content"
 import { DashboardSkeleton } from "@/components/dashboard-skeleton"
+import { Header } from "@/components/header"
 
 /**
  * Fetches and prepares project data for the dashboard.
@@ -72,17 +73,11 @@ function getStatusSummary(
 export default async function DashboardPage() {
   return (
     <main className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-6">
-          <h1 className="text-3xl font-bold tracking-tight">
-            Project Dashboard
-          </h1>
-          <p className="mt-1 text-muted-foreground">
-            Your unified view for tracking development projects
-          </p>
-        </div>
-      </header>
+      {/* Header with Theme Toggle */}
+      <Header
+        title="Project Dashboard"
+        subtitle="Your unified view for tracking development projects"
+      />
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-6">

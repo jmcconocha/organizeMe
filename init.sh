@@ -20,8 +20,8 @@ pkill -9 -f "next-server" 2>/dev/null
 pkill -9 -f "next dev" 2>/dev/null
 sleep 1
 
-# Check if node_modules exists
-if [ ! -d "node_modules" ]; then
+# Check if node_modules exists or if package.json is newer than node_modules
+if [ ! -d "node_modules" ] || [ "package.json" -nt "node_modules" ]; then
     echo "📦 Installing dependencies..."
     npm install
 fi
