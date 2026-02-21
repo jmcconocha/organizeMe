@@ -1,25 +1,25 @@
 {
   "active": true,
-  "spec": "001-i-need-a-way-to-manage-my-developent-projects-i-am",
+  "spec": "002-sorting-options",
   "state": "building",
   "subtasks": {
-    "completed": 19,
-    "total": 20,
+    "completed": 4,
+    "total": 5,
     "in_progress": 1,
     "failed": 0
   },
   "phase": {
-    "current": "Integration & Polish",
+    "current": "End-to-End Verification",
     "id": null,
-    "total": 4
+    "total": 1
   },
   "workers": {
     "active": 0,
     "max": 1
   },
   "session": {
-    "number": 20,
-    "started_at": "2025-12-28T17:34:50.311955"
+    "number": 6,
+    "started_at": "2026-02-21T11:37:22.683045"
   },
-  "last_update": "2025-12-28T18:31:20.708474"
+  "last_update": "2026-02-21T11:48:54.465898"
 }

@@ -30,12 +30,6 @@ async function getProjects(): Promise<{
     // Enrich projects with Git information
     const enrichedProjects = await enrichProjectsWithGitInfo(projects)
 
-    // Sort projects by last modified date (most recent first)
-    enrichedProjects.sort(
-      (a, b) =>
-        new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime()
-    )
-
     return { projects: enrichedProjects }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error"
