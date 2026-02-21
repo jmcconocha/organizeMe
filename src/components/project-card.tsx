@@ -15,6 +15,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { StatusBadge } from "@/components/status-badge"
+import { getTagColor } from "@/lib/tag-colors"
 
 /**
  * View mode variants for the project card.
@@ -165,7 +166,7 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
                 {project.tags && project.tags.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-2">
                     {project.tags.map((tag) => (
-                      <Badge key={tag} variant="secondary">
+                      <Badge key={tag} className={cn("border", getTagColor(tag))}>
                         {tag}
                       </Badge>
                     ))}
@@ -239,7 +240,7 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
                   {project.tags && project.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1">
                       {project.tags.map((tag) => (
-                        <Badge key={tag} variant="secondary">
+                        <Badge key={tag} className={cn("border", getTagColor(tag))}>
                           {tag}
                         </Badge>
                       ))}

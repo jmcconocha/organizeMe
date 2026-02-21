@@ -3,6 +3,7 @@ import { X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
+import { getTagColor } from "@/lib/tag-colors"
 
 export interface TagInputProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'> {
   /** Current selected tags */
@@ -191,15 +192,17 @@ const TagInput = React.forwardRef<HTMLDivElement, TagInputProps>(
           {value.map((tag) => (
             <Badge
               key={tag}
-              variant="secondary"
-              className="gap-1 pr-1.5 pl-2.5"
+              className={cn(
+                "gap-1 pr-1.5 pl-2.5 border",
+                getTagColor(tag)
+              )}
             >
               <span>{tag}</span>
               <button
                 type="button"
                 onClick={() => removeTag(tag)}
                 disabled={disabled}
-                className="ml-0.5 rounded-full hover:bg-secondary-foreground/20 focus:outline-none focus:ring-1 focus:ring-ring"
+                className="ml-0.5 rounded-full hover:bg-black/10 dark:hover:bg-white/10 focus:outline-none focus:ring-1 focus:ring-ring"
                 aria-label={`Remove ${tag} tag`}
               >
                 <X className="h-3 w-3" />
