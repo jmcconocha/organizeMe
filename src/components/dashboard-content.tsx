@@ -16,6 +16,7 @@ import { ProjectTable } from "@/components/project-table"
 import { RefreshButton } from "@/components/refresh-button"
 import { SortDropdown } from "@/components/sort-dropdown"
 import { StatusBadge } from "@/components/status-badge"
+import { TagFilter } from "@/components/tag-filter"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
@@ -119,6 +120,7 @@ export function DashboardContent({
 }: DashboardContentProps) {
   const router = useRouter()
   const [currentSort, setCurrentSort] = React.useState<SortOption>("modified-newest")
+  const [selectedTags, setSelectedTags] = React.useState<string[]>([])
 
   const handleRefreshComplete = React.useCallback(() => {
     // Refresh the page to get updated data
@@ -133,10 +135,30 @@ export function DashboardContent({
     [router]
   )
 
+  // Collect all unique tags from all projects
+  const availableTags = React.useMemo(() => {
+    const tagsSet = new Set<string>()
+    projects.forEach((project) => {
+      project.tags?.forEach((tag) => tagsSet.add(tag))
+    })
+    return Array.from(tagsSet).sort()
+  }, [projects])
+
+  // Filter projects by selected tags
+  const filteredProjects = React.useMemo(() => {
+    if (selectedTags.length === 0) {
+      return projects
+    }
+    return projects.filter((project) => {
+      // Project must have at least one of the selected tags
+      return project.tags?.some((tag) => selectedTags.includes(tag))
+    })
+  }, [projects, selectedTags])
+
   // Sort projects based on current sort option
   const sortedProjects = React.useMemo(
-    () => sortProjects(projects, currentSort),
-    [projects, currentSort]
+    () => sortProjects(filteredProjects, currentSort),
+    [filteredProjects, currentSort]
   )
 
   if (projects.length === 0) {
@@ -234,6 +256,12 @@ export function DashboardContent({
                   <span className="hidden sm:inline">Table</span>
                 </TabsTrigger>
               </TabsList>
+
+              <TagFilter
+                availableTags={availableTags}
+                selectedTags={selectedTags}
+                onTagsChange={setSelectedTags}
+              />
 
               <SortDropdown
                 currentSort={currentSort}
