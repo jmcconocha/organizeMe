@@ -14,10 +14,12 @@ import type { Project, ProjectStatus } from "@/types/project"
 import { ProjectCard } from "@/components/project-card"
 import { ProjectTable } from "@/components/project-table"
 import { RefreshButton } from "@/components/refresh-button"
+import { SortDropdown } from "@/components/sort-dropdown"
 import { StatusBadge } from "@/components/status-badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+import { type SortOption, sortProjects } from "@/lib/sort-utils"
 
 /**
  * Status summary type containing counts for each status and total.
@@ -116,6 +118,7 @@ export function DashboardContent({
   statusSummary,
 }: DashboardContentProps) {
   const router = useRouter()
+  const [currentSort, setCurrentSort] = React.useState<SortOption>("name-asc")
 
   const handleRefreshComplete = React.useCallback(() => {
     // Refresh the page to get updated data
@@ -128,6 +131,12 @@ export function DashboardContent({
       router.push(`/projects/${encodeURIComponent(project.id)}`)
     },
     [router]
+  )
+
+  // Sort projects based on current sort option
+  const sortedProjects = React.useMemo(
+    () => sortProjects(projects, currentSort),
+    [projects, currentSort]
   )
 
   if (projects.length === 0) {
@@ -210,7 +219,7 @@ export function DashboardContent({
                 Projects
               </h2>
               <span className="text-sm text-muted-foreground">
-                ({projects.length})
+                ({sortedProjects.length})
               </span>
             </div>
 
@@ -226,6 +235,11 @@ export function DashboardContent({
                 </TabsTrigger>
               </TabsList>
 
+              <SortDropdown
+                currentSort={currentSort}
+                onSortChange={setCurrentSort}
+              />
+
               <RefreshButton
                 size="sm"
                 onRefreshComplete={handleRefreshComplete}
@@ -236,7 +250,7 @@ export function DashboardContent({
           {/* Grid View */}
           <TabsContent value="grid" className="mt-0">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {projects.map((project) => (
+              {sortedProjects.map((project) => (
                 <ProjectCard
                   key={project.id}
                   project={project}
@@ -252,7 +266,7 @@ export function DashboardContent({
           <TabsContent value="table" className="mt-0">
             <div className="border rounded-lg overflow-hidden">
               <ProjectTable
-                projects={projects}
+                projects={sortedProjects}
                 onProjectClick={handleProjectClick}
               />
             </div>
