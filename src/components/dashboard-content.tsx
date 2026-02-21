@@ -122,6 +122,7 @@ export function DashboardContent({
   const router = useRouter()
   const [currentSort, setCurrentSort] = React.useState<SortOption>("modified-newest")
   const [selectedTags, setSelectedTags] = React.useState<string[]>([])
+  const [searchQuery, setSearchQuery] = React.useState<string>("")
   const { favorites, toggleFavorite } = useFavorites()
 
   const handleRefreshComplete = React.useCallback(() => {
@@ -155,16 +156,32 @@ export function DashboardContent({
     }
   }, [projects])
 
+  // Filter projects by search query
+  const searchFilteredProjects = React.useMemo(() => {
+    if (!searchQuery || searchQuery.trim() === "") {
+      return projects
+    }
+    const lowerQuery = searchQuery.toLowerCase()
+    return projects.filter((project) => {
+      // Search in name, path, and description (case-insensitive)
+      return (
+        project.name.toLowerCase().includes(lowerQuery) ||
+        project.path.toLowerCase().includes(lowerQuery) ||
+        (project.description?.toLowerCase().includes(lowerQuery) ?? false)
+      )
+    })
+  }, [projects, searchQuery])
+
   // Filter projects by selected tags
   const filteredProjects = React.useMemo(() => {
     if (selectedTags.length === 0) {
-      return projects
+      return searchFilteredProjects
     }
-    return projects.filter((project) => {
+    return searchFilteredProjects.filter((project) => {
       // Project must have at least one of the selected tags
       return project.tags?.some((tag) => selectedTags.includes(tag))
     })
-  }, [projects, selectedTags])
+  }, [searchFilteredProjects, selectedTags])
 
   // Sort projects based on current sort option with favorites appearing first
   const sortedProjects = React.useMemo(
