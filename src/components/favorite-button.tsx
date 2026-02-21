@@ -106,9 +106,15 @@ function FavoriteButton({
   onToggle,
   ...props
 }: FavoriteButtonProps) {
-  const handleClick = React.useCallback(() => {
-    onToggle?.(!isFavorite)
-  }, [isFavorite, onToggle])
+  const handleClick = React.useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      // Prevent event propagation to parent elements (e.g., card links)
+      e.stopPropagation()
+      e.preventDefault()
+      onToggle?.(!isFavorite)
+    },
+    [isFavorite, onToggle]
+  )
 
   const label = isFavorite ? favoritedLabel : unfavoritedLabel
   const ariaLabel = isFavorite ? "Remove from favorites" : "Add to favorites"
