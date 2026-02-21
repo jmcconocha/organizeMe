@@ -667,6 +667,9 @@
       "unknown": 1
     }
   },
-  "status": "qa_approved",
-  "planStatus": "review"
+  "status": "done",
+  "planStatus": "completed",
+  "updated_at": "2026-02-20T22:14:26.127Z",
+  "xstateState": "done",
+  "executionPhase": "complete"
 }

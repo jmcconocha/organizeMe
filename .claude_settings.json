@@ -11,14 +11,17 @@
       "Edit(./**)",
       "Glob(./**)",
       "Grep(./**)",
+      "Read(/Users/jmcconocha/Documents/Projects/organizeMe/**)",
+      "Write(/Users/jmcconocha/Documents/Projects/organizeMe/**)",
+      "Edit(/Users/jmcconocha/Documents/Projects/organizeMe/**)",
+      "Glob(/Users/jmcconocha/Documents/Projects/organizeMe/**)",
+      "Grep(/Users/jmcconocha/Documents/Projects/organizeMe/**)",
+      "Read(/Users/jmcconocha/Documents/Projects/organizeMe/.auto-claude/ideation/**)",
+      "Write(/Users/jmcconocha/Documents/Projects/organizeMe/.auto-claude/ideation/**)",
+      "Edit(/Users/jmcconocha/Documents/Projects/organizeMe/.auto-claude/ideation/**)",
       "Bash(*)",
-      "mcp__context7__resolve-library-id",
-      "mcp__context7__get-library-docs",
-      "mcp__graphiti-memory__search_nodes",
-      "mcp__graphiti-memory__search_facts",
-      "mcp__graphiti-memory__add_episode",
-      "mcp__graphiti-memory__get_episodes",
-      "mcp__graphiti-memory__get_entity_edge"
+      "WebFetch(*)",
+      "WebSearch(*)"
     ]
   }
 }
