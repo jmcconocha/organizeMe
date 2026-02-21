@@ -141,6 +141,15 @@ export function DashboardContent({
     [projects, favorites, currentSort]
   )
 
+  // Split projects into favorites and non-favorites for grid view
+  const { favoriteProjects, nonFavoriteProjects } = React.useMemo(() => {
+    const favSet = new Set(favorites)
+    return {
+      favoriteProjects: sortedProjects.filter((p) => favSet.has(p.id)),
+      nonFavoriteProjects: sortedProjects.filter((p) => !favSet.has(p.id)),
+    }
+  }, [sortedProjects, favorites])
+
   if (projects.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -251,16 +260,63 @@ export function DashboardContent({
 
           {/* Grid View */}
           <TabsContent value="grid" className="mt-0">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {sortedProjects.map((project) => (
-                <ProjectCard
-                  key={project.id}
-                  project={project}
-                  viewMode="grid"
-                  showDescription
-                  showGitInfo
-                />
-              ))}
+            <div className="space-y-6">
+              {/* Favorites Section */}
+              {favoriteProjects.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <h3 className="text-sm font-medium text-muted-foreground">
+                      Favorites
+                    </h3>
+                    <span className="text-xs text-muted-foreground">
+                      ({favoriteProjects.length})
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {favoriteProjects.map((project) => (
+                      <ProjectCard
+                        key={project.id}
+                        project={project}
+                        viewMode="grid"
+                        showDescription
+                        showGitInfo
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Separator between favorites and other projects */}
+              {favoriteProjects.length > 0 && nonFavoriteProjects.length > 0 && (
+                <Separator />
+              )}
+
+              {/* Other Projects Section */}
+              {nonFavoriteProjects.length > 0 && (
+                <div>
+                  {favoriteProjects.length > 0 && (
+                    <div className="flex items-center gap-2 mb-4">
+                      <h3 className="text-sm font-medium text-muted-foreground">
+                        Other Projects
+                      </h3>
+                      <span className="text-xs text-muted-foreground">
+                        ({nonFavoriteProjects.length})
+                      </span>
+                    </div>
+                  )}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {nonFavoriteProjects.map((project) => (
+                      <ProjectCard
+                        key={project.id}
+                        project={project}
+                        viewMode="grid"
+                        showDescription
+                        showGitInfo
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </TabsContent>
 
