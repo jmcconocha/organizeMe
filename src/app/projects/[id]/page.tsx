@@ -18,6 +18,7 @@ import { StatusBadge } from "@/components/status-badge"
 import { Separator } from "@/components/ui/separator"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ProjectDetailActions } from "./project-detail-actions"
+import { MarkdownRenderer } from "@/components/markdown-renderer"
 
 interface ProjectDetailPageProps {
   params: Promise<{ id: string }>
@@ -342,11 +343,7 @@ async function ProjectDetailContent({ id }: { id: string }) {
             <CardDescription>Project documentation from README file</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="prose prose-sm dark:prose-invert max-w-none">
-              <pre className="whitespace-pre-wrap font-sans text-sm bg-muted p-4 rounded-lg overflow-auto max-h-[600px]">
-                {project.readmeContent}
-              </pre>
-            </div>
+            <MarkdownRenderer content={project.readmeContent} />
           </CardContent>
         </Card>
       )}
