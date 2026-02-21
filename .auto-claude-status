@@ -1,25 +1,25 @@
 {
   "active": true,
   "spec": "005-project-tags-categories",
-  "state": "planning",
+  "state": "building",
   "subtasks": {
-    "completed": 0,
-    "total": 0,
+    "completed": 6,
+    "total": 13,
     "in_progress": 1,
     "failed": 0
   },
   "phase": {
-    "current": "Data Model & Storage",
+    "current": "Tag Input Component",
     "id": null,
-    "total": 3
+    "total": 4
   },
   "workers": {
     "active": 0,
     "max": 1
   },
   "session": {
-    "number": 2,
+    "number": 8,
     "started_at": "2026-02-21T17:04:45.933442"
   },
-  "last_update": "2026-02-21T17:08:25.762968"
+  "last_update": "2026-02-21T17:22:00.429321"
 }

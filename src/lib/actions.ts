@@ -366,3 +366,136 @@ export async function openInBrowser(url: string): Promise<OpenInAppResult> {
     }
   }
 }
+
+/**
+ * Result of a tag operation.
+ */
+export interface TagOperationResult {
+  success: boolean
+  message: string
+  tags?: string[]
+}
+
+/**
+ * Adds a tag to a project.
+ *
+ * This server action:
+ * 1. Adds the specified tag to the project's tag list
+ * 2. Persists the tag to the storage file
+ * 3. Revalidates the dashboard cache to show updated tags
+ *
+ * @param projectId - The unique identifier of the project
+ * @param tag - The tag string to add
+ * @returns Promise resolving to TagOperationResult with updated tag list
+ *
+ * @example
+ * ```tsx
+ * // In a client component
+ * 'use client'
+ * import { addProjectTag } from '@/lib/actions'
+ *
+ * function AddTagButton({ projectId, tag }: { projectId: string; tag: string }) {
+ *   const handleAddTag = async () => {
+ *     const result = await addProjectTag(projectId, tag)
+ *     if (!result.success) {
+ *       console.error(result.message)
+ *     }
+ *   }
+ *   return <button onClick={handleAddTag}>Add Tag</button>
+ * }
+ * ```
+ */
+export async function addProjectTag(
+  projectId: string,
+  tag: string
+): Promise<TagOperationResult> {
+  try {
+    const { addTagToProject, getProjectTags } = await import('./tag-storage')
+
+    // Add the tag to the project
+    await addTagToProject(projectId, tag)
+
+    // Get updated tags
+    const updatedTags = await getProjectTags(projectId)
+
+    // Revalidate the dashboard pages
+    revalidatePath('/')
+    revalidatePath('/projects')
+    revalidatePath(`/projects/${projectId}`)
+
+    return {
+      success: true,
+      message: `Tag "${tag}" added to project`,
+      tags: updatedTags,
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+
+    return {
+      success: false,
+      message: `Failed to add tag: ${errorMessage}`,
+    }
+  }
+}
+
+/**
+ * Removes a tag from a project.
+ *
+ * This server action:
+ * 1. Removes the specified tag from the project's tag list
+ * 2. Persists the change to the storage file
+ * 3. Revalidates the dashboard cache to show updated tags
+ *
+ * @param projectId - The unique identifier of the project
+ * @param tag - The tag string to remove
+ * @returns Promise resolving to TagOperationResult with updated tag list
+ *
+ * @example
+ * ```tsx
+ * // In a client component
+ * 'use client'
+ * import { removeProjectTag } from '@/lib/actions'
+ *
+ * function RemoveTagButton({ projectId, tag }: { projectId: string; tag: string }) {
+ *   const handleRemoveTag = async () => {
+ *     const result = await removeProjectTag(projectId, tag)
+ *     if (!result.success) {
+ *       console.error(result.message)
+ *     }
+ *   }
+ *   return <button onClick={handleRemoveTag}>Remove Tag</button>
+ * }
+ * ```
+ */
+export async function removeProjectTag(
+  projectId: string,
+  tag: string
+): Promise<TagOperationResult> {
+  try {
+    const { removeTagFromProject, getProjectTags } = await import('./tag-storage')
+
+    // Remove the tag from the project
+    await removeTagFromProject(projectId, tag)
+
+    // Get updated tags
+    const updatedTags = await getProjectTags(projectId)
+
+    // Revalidate the dashboard pages
+    revalidatePath('/')
+    revalidatePath('/projects')
+    revalidatePath(`/projects/${projectId}`)
+
+    return {
+      success: true,
+      message: `Tag "${tag}" removed from project`,
+      tags: updatedTags,
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+
+    return {
+      success: false,
+      message: `Failed to remove tag: ${errorMessage}`,
+    }
+  }
+}
