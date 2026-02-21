@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { StatusBadge } from "@/components/status-badge"
 
 /**
@@ -160,6 +161,15 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
                 {!project.gitInfo && (
                   <span className="text-xs text-muted-foreground">No Git</span>
                 )}
+                {project.tags && project.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {project.tags.map((tag) => (
+                      <Badge key={tag} variant="secondary">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
               </CardContent>
               <CardFooter className="pt-2 pb-4 flex items-center justify-between text-xs text-muted-foreground">
                 <span title={new Date(project.lastModified).toLocaleString()}>
@@ -211,6 +221,15 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
                   )}
                   {!project.gitInfo && (
                     <span className="text-xs text-muted-foreground">No Git</span>
+                  )}
+                  {project.tags && project.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {project.tags.map((tag) => (
+                        <Badge key={tag} variant="secondary">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
                   )}
                 </div>
                 {showDescription && project.description && (
