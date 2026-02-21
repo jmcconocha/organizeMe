@@ -20,7 +20,8 @@ import { TagFilter } from "@/components/tag-filter"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { type SortOption, sortProjects } from "@/lib/sort-utils"
+import { type SortOption, sortProjectsWithFavorites } from "@/lib/sort-utils"
+import { useFavorites } from "@/hooks/use-favorites"
 
 /**
  * Status summary type containing counts for each status and total.
@@ -121,6 +122,7 @@ export function DashboardContent({
   const router = useRouter()
   const [currentSort, setCurrentSort] = React.useState<SortOption>("modified-newest")
   const [selectedTags, setSelectedTags] = React.useState<string[]>([])
+  const { favorites, toggleFavorite } = useFavorites()
 
   const handleRefreshComplete = React.useCallback(() => {
     // Refresh the page to get updated data
@@ -164,11 +166,20 @@ export function DashboardContent({
     })
   }, [projects, selectedTags])
 
-  // Sort projects based on current sort option
+  // Sort projects based on current sort option with favorites appearing first
   const sortedProjects = React.useMemo(
-    () => sortProjects(filteredProjects, currentSort),
-    [filteredProjects, currentSort]
+    () => sortProjectsWithFavorites(filteredProjects, favorites, currentSort),
+    [filteredProjects, favorites, currentSort]
   )
+
+  // Split projects into favorites and non-favorites for grid view
+  const { favoriteProjects, nonFavoriteProjects } = React.useMemo(() => {
+    const favSet = new Set(favorites)
+    return {
+      favoriteProjects: sortedProjects.filter((p) => favSet.has(p.id)),
+      nonFavoriteProjects: sortedProjects.filter((p) => !favSet.has(p.id)),
+    }
+  }, [sortedProjects, favorites])
 
   if (projects.length === 0) {
     return (
@@ -287,16 +298,67 @@ export function DashboardContent({
 
           {/* Grid View */}
           <TabsContent value="grid" className="mt-0">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {sortedProjects.map((project) => (
-                <ProjectCard
-                  key={project.id}
-                  project={project}
-                  viewMode="grid"
-                  showDescription
-                  showGitInfo
-                />
-              ))}
+            <div className="space-y-6">
+              {/* Favorites Section */}
+              {favoriteProjects.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <h3 className="text-sm font-medium text-muted-foreground">
+                      Favorites
+                    </h3>
+                    <span className="text-xs text-muted-foreground">
+                      ({favoriteProjects.length})
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {favoriteProjects.map((project) => (
+                      <ProjectCard
+                        key={project.id}
+                        project={project}
+                        viewMode="grid"
+                        showDescription
+                        showGitInfo
+                        isFavorite={true}
+                        onToggle={() => toggleFavorite(project.id)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Separator between favorites and other projects */}
+              {favoriteProjects.length > 0 && nonFavoriteProjects.length > 0 && (
+                <Separator />
+              )}
+
+              {/* Other Projects Section */}
+              {nonFavoriteProjects.length > 0 && (
+                <div>
+                  {favoriteProjects.length > 0 && (
+                    <div className="flex items-center gap-2 mb-4">
+                      <h3 className="text-sm font-medium text-muted-foreground">
+                        Other Projects
+                      </h3>
+                      <span className="text-xs text-muted-foreground">
+                        ({nonFavoriteProjects.length})
+                      </span>
+                    </div>
+                  )}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {nonFavoriteProjects.map((project) => (
+                      <ProjectCard
+                        key={project.id}
+                        project={project}
+                        viewMode="grid"
+                        showDescription
+                        showGitInfo
+                        isFavorite={false}
+                        onToggle={() => toggleFavorite(project.id)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </TabsContent>
 

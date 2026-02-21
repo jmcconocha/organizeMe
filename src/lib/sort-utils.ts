@@ -165,3 +165,49 @@ export function sortProjects(
 ): Project[] {
   return [...projects].sort(getSortComparator(sortOption))
 }
+
+/**
+ * Sorts an array of projects with favorites appearing first.
+ * Favorites are sorted according to the specified sort option,
+ * followed by non-favorites sorted by the same criteria.
+ *
+ * @param projects - The array of projects to sort
+ * @param favorites - Set of project IDs that are marked as favorites
+ * @param sortOption - The sort criteria to use within each group
+ * @returns A new sorted array with favorites first, then non-favorites
+ *
+ * @example
+ * ```ts
+ * const projects = await getProjects();
+ * const favorites = new Set(['project-1', 'project-3']);
+ * const sorted = sortProjectsWithFavorites(projects, favorites, 'name-asc');
+ * // Returns: [project-1, project-3, ...other projects sorted by name]
+ * ```
+ */
+export function sortProjectsWithFavorites(
+  projects: Project[],
+  favorites: Set<string>,
+  sortOption: SortOption
+): Project[] {
+  // Separate projects into favorites and non-favorites
+  const favoriteProjects: Project[] = []
+  const nonFavoriteProjects: Project[] = []
+
+  for (const project of projects) {
+    if (favorites.has(project.id)) {
+      favoriteProjects.push(project)
+    } else {
+      nonFavoriteProjects.push(project)
+    }
+  }
+
+  // Get the comparator function for the sort option
+  const comparator = getSortComparator(sortOption)
+
+  // Sort both groups independently using the same sort criteria
+  const sortedFavorites = favoriteProjects.sort(comparator)
+  const sortedNonFavorites = nonFavoriteProjects.sort(comparator)
+
+  // Return favorites first, followed by non-favorites
+  return [...sortedFavorites, ...sortedNonFavorites]
+}

@@ -1,25 +1,25 @@
 {
   "active": true,
-  "spec": "005-project-tags-categories",
+  "spec": "004-favorite-pinned-projects",
   "state": "building",
   "subtasks": {
-    "completed": 8,
-    "total": 13,
+    "completed": 1,
+    "total": 9,
     "in_progress": 1,
     "failed": 0
   },
   "phase": {
-    "current": "Tag Input Component",
+    "current": "Favorites Storage Layer",
     "id": null,
-    "total": 4
+    "total": 2
   },
   "workers": {
     "active": 0,
     "max": 1
   },
   "session": {
-    "number": 10,
-    "started_at": "2026-02-21T17:04:45.933442"
+    "number": 3,
+    "started_at": "2026-02-21T17:04:20.154513"
   },
-  "last_update": "2026-02-21T17:27:20.582829"
+  "last_update": "2026-02-21T17:09:35.645337"
 }
