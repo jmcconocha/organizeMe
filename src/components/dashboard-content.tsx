@@ -19,7 +19,8 @@ import { StatusBadge } from "@/components/status-badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { type SortOption, sortProjects } from "@/lib/sort-utils"
+import { type SortOption, sortProjectsWithFavorites } from "@/lib/sort-utils"
+import { useFavorites } from "@/hooks/use-favorites"
 
 /**
  * Status summary type containing counts for each status and total.
@@ -119,6 +120,7 @@ export function DashboardContent({
 }: DashboardContentProps) {
   const router = useRouter()
   const [currentSort, setCurrentSort] = React.useState<SortOption>("modified-newest")
+  const { favorites } = useFavorites()
 
   const handleRefreshComplete = React.useCallback(() => {
     // Refresh the page to get updated data
@@ -133,10 +135,10 @@ export function DashboardContent({
     [router]
   )
 
-  // Sort projects based on current sort option
+  // Sort projects based on current sort option with favorites appearing first
   const sortedProjects = React.useMemo(
-    () => sortProjects(projects, currentSort),
-    [projects, currentSort]
+    () => sortProjectsWithFavorites(projects, favorites, currentSort),
+    [projects, favorites, currentSort]
   )
 
   if (projects.length === 0) {
