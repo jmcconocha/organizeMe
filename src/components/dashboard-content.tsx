@@ -20,6 +20,7 @@ import { StatusBadge } from "@/components/status-badge"
 import { StatusFilter } from "@/components/status-filter"
 import { TagFilter } from "@/components/tag-filter"
 import { PaginationControls } from "@/components/pagination-controls"
+import { DashboardSettingsDialog } from "@/components/dashboard-settings-dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
@@ -514,6 +515,8 @@ export function DashboardContent({
                 currentSort={currentSort}
                 onSortChange={setCurrentSort}
               />
+
+              <DashboardSettingsDialog />
 
               <RefreshButton
                 size="sm"
