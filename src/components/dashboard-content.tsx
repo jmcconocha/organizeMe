@@ -396,11 +396,13 @@ export function DashboardContent({
           </Card>
 
           {/* Status Cards */}
-          {statusOrder.map((status) => {
-            const count = statusSummary[status]
-            if (count === 0) return null
+          {statusOrder
+            .filter((status) => settings.visibleStatusCards.includes(status))
+            .map((status) => {
+              const count = statusSummary[status]
+              if (count === 0) return null
 
-            const isActive = selectedStatuses.includes(status)
+              const isActive = selectedStatuses.includes(status)
 
             return (
               <Card
