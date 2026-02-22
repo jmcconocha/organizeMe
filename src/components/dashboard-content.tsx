@@ -29,6 +29,7 @@ import { useFavorites } from "@/hooks/use-favorites"
 import { useStatusFilters } from "@/hooks/use-status-filters"
 import { usePagination } from "@/hooks/use-pagination"
 import { useArchive } from "@/hooks/use-archive"
+import { useDashboardSettings } from "@/hooks/use-dashboard-settings"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 
@@ -158,6 +159,7 @@ export function DashboardContent({
   const [showArchived, setShowArchived] = React.useState<boolean>(false)
   const { favorites, toggleFavorite } = useFavorites()
   const { archivedProjects, toggleArchive } = useArchive()
+  const { settings } = useDashboardSettings()
 
   // Use the status filters hook for localStorage persistence
   const {
@@ -442,7 +444,7 @@ export function DashboardContent({
 
       {/* Projects View */}
       <section aria-labelledby="projects-heading">
-        <Tabs defaultValue="grid" className="w-full">
+        <Tabs defaultValue={settings.defaultView} className="w-full">
           {/* Toolbar */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
             <div className="flex items-center gap-2">
