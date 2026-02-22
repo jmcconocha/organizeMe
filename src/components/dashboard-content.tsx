@@ -18,11 +18,13 @@ import { SearchBar } from "@/components/search-bar"
 import { SortDropdown } from "@/components/sort-dropdown"
 import { StatusBadge } from "@/components/status-badge"
 import { TagFilter } from "@/components/tag-filter"
+import { PaginationControls } from "@/components/pagination-controls"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { type SortOption, sortProjectsWithFavorites } from "@/lib/sort-utils"
 import { useFavorites } from "@/hooks/use-favorites"
+import { usePagination } from "@/hooks/use-pagination"
 
 /**
  * Status summary type containing counts for each status and total.
@@ -190,14 +192,38 @@ export function DashboardContent({
     [filteredProjects, favorites, currentSort]
   )
 
-  // Split projects into favorites and non-favorites for grid view
+  // Pagination hook - paginate the sorted/filtered projects
+  const {
+    currentPage,
+    pageSize,
+    totalPages,
+    hasPreviousPage,
+    hasNextPage,
+    nextPage,
+    previousPage,
+    setPageSize,
+    startIndex,
+    endIndex,
+  } = usePagination({
+    totalItems: sortedProjects.length,
+    initialPageSize: 20,
+    syncWithUrl: true,
+  })
+
+  // Get the current page of projects
+  const paginatedProjects = React.useMemo(
+    () => sortedProjects.slice(startIndex, endIndex),
+    [sortedProjects, startIndex, endIndex]
+  )
+
+  // Split paginated projects into favorites and non-favorites for grid view
   const { favoriteProjects, nonFavoriteProjects } = React.useMemo(() => {
     const favSet = new Set(favorites)
     return {
-      favoriteProjects: sortedProjects.filter((p) => favSet.has(p.id)),
-      nonFavoriteProjects: sortedProjects.filter((p) => !favSet.has(p.id)),
+      favoriteProjects: paginatedProjects.filter((p) => favSet.has(p.id)),
+      nonFavoriteProjects: paginatedProjects.filter((p) => !favSet.has(p.id)),
     }
-  }, [sortedProjects, favorites])
+  }, [paginatedProjects, favorites])
 
   // Check if any filters are active
   const hasActiveFilters = searchQuery.trim() !== "" || selectedTags.length > 0
@@ -350,68 +376,84 @@ export function DashboardContent({
                 </button>
               </div>
             ) : (
-              <div className="space-y-6">
-                {/* Favorites Section */}
-                {favoriteProjects.length > 0 && (
-                <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <h3 className="text-sm font-medium text-muted-foreground">
-                      Favorites
-                    </h3>
-                    <span className="text-xs text-muted-foreground">
-                      ({favoriteProjects.length})
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {favoriteProjects.map((project) => (
-                      <ProjectCard
-                        key={project.id}
-                        project={project}
-                        viewMode="grid"
-                        showDescription
-                        showGitInfo
-                        isFavorite={true}
-                        onToggle={() => toggleFavorite(project.id)}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Separator between favorites and other projects */}
-              {favoriteProjects.length > 0 && nonFavoriteProjects.length > 0 && (
-                <Separator />
-              )}
-
-              {/* Other Projects Section */}
-              {nonFavoriteProjects.length > 0 && (
-                <div>
+              <>
+                <div className="space-y-6">
+                  {/* Favorites Section */}
                   {favoriteProjects.length > 0 && (
+                  <div>
                     <div className="flex items-center gap-2 mb-4">
                       <h3 className="text-sm font-medium text-muted-foreground">
-                        Other Projects
+                        Favorites
                       </h3>
                       <span className="text-xs text-muted-foreground">
-                        ({nonFavoriteProjects.length})
+                        ({favoriteProjects.length})
                       </span>
                     </div>
-                  )}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {nonFavoriteProjects.map((project) => (
-                      <ProjectCard
-                        key={project.id}
-                        project={project}
-                        viewMode="grid"
-                        showDescription
-                        showGitInfo
-                        isFavorite={false}
-                        onToggle={() => toggleFavorite(project.id)}
-                      />
-                    ))}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                      {favoriteProjects.map((project) => (
+                        <ProjectCard
+                          key={project.id}
+                          project={project}
+                          viewMode="grid"
+                          showDescription
+                          showGitInfo
+                          isFavorite={true}
+                          onToggle={() => toggleFavorite(project.id)}
+                        />
+                      ))}
+                    </div>
                   </div>
+                )}
+
+                {/* Separator between favorites and other projects */}
+                {favoriteProjects.length > 0 && nonFavoriteProjects.length > 0 && (
+                  <Separator />
+                )}
+
+                {/* Other Projects Section */}
+                {nonFavoriteProjects.length > 0 && (
+                  <div>
+                    {favoriteProjects.length > 0 && (
+                      <div className="flex items-center gap-2 mb-4">
+                        <h3 className="text-sm font-medium text-muted-foreground">
+                          Other Projects
+                        </h3>
+                        <span className="text-xs text-muted-foreground">
+                          ({nonFavoriteProjects.length})
+                        </span>
+                      </div>
+                    )}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                      {nonFavoriteProjects.map((project) => (
+                        <ProjectCard
+                          key={project.id}
+                          project={project}
+                          viewMode="grid"
+                          showDescription
+                          showGitInfo
+                          isFavorite={false}
+                          onToggle={() => toggleFavorite(project.id)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
                 </div>
-              )}
-              </div>
+
+                {/* Pagination Controls */}
+                {sortedProjects.length > 0 && (
+                  <PaginationControls
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    hasPreviousPage={hasPreviousPage}
+                    hasNextPage={hasNextPage}
+                    previousPage={previousPage}
+                    nextPage={nextPage}
+                    pageSize={pageSize}
+                    setPageSize={setPageSize}
+                  />
+                )}
+              </>
             )}
           </TabsContent>
 
@@ -434,12 +476,28 @@ export function DashboardContent({
                 </button>
               </div>
             ) : (
-              <div className="border rounded-lg overflow-hidden">
-                <ProjectTable
-                  projects={sortedProjects}
-                  onProjectClick={handleProjectClick}
-                />
-              </div>
+              <>
+                <div className="border rounded-lg overflow-hidden">
+                  <ProjectTable
+                    projects={paginatedProjects}
+                    onProjectClick={handleProjectClick}
+                  />
+                </div>
+
+                {/* Pagination Controls */}
+                {sortedProjects.length > 0 && (
+                  <PaginationControls
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    hasPreviousPage={hasPreviousPage}
+                    hasNextPage={hasNextPage}
+                    previousPage={previousPage}
+                    nextPage={nextPage}
+                    pageSize={pageSize}
+                    setPageSize={setPageSize}
+                  />
+                )}
+              </>
             )}
           </TabsContent>
         </Tabs>
