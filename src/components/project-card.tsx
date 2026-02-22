@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button"
 import { StatusBadge } from "@/components/status-badge"
 import { getTagColor } from "@/lib/tag-colors"
 import { FavoriteButton } from "@/components/favorite-button"
+import { ArchiveButton } from "@/components/archive-button"
 
 /**
  * View mode variants for the project card.
@@ -50,6 +51,10 @@ export interface ProjectCardProps
   isFavorite?: boolean
   /** Callback when favorite status is toggled */
   onToggle?: () => void
+  /** Whether this project is archived */
+  isArchived?: boolean
+  /** Callback when archive status is toggled */
+  onArchiveToggle?: () => void
 }
 
 /**
@@ -117,6 +122,8 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
       showGitInfo = true,
       isFavorite = false,
       onToggle,
+      isArchived = false,
+      onArchiveToggle,
       ...props
     },
     ref
@@ -150,6 +157,11 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
                     <FavoriteButton
                       isFavorite={isFavorite}
                       onToggle={onToggle}
+                      size="sm"
+                    />
+                    <ArchiveButton
+                      isArchived={isArchived}
+                      onToggle={onArchiveToggle}
                       size="sm"
                     />
                     <StatusBadge status={project.status} showLabel={false} />
@@ -236,6 +248,11 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
                 <FavoriteButton
                   isFavorite={isFavorite}
                   onToggle={onToggle}
+                  size="sm"
+                />
+                <ArchiveButton
+                  isArchived={isArchived}
+                  onToggle={onArchiveToggle}
                   size="sm"
                 />
                 <StatusBadge status={project.status} showLabel={false} />
