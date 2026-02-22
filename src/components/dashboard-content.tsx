@@ -27,6 +27,9 @@ import { type SortOption, sortProjectsWithFavorites } from "@/lib/sort-utils"
 import { useFavorites } from "@/hooks/use-favorites"
 import { useStatusFilters } from "@/hooks/use-status-filters"
 import { usePagination } from "@/hooks/use-pagination"
+import { useArchive } from "@/hooks/use-archive"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 
 /**
  * Status summary type containing counts for each status and total.
@@ -115,6 +118,29 @@ function FolderIcon({ className }: { className?: string }) {
 }
 
 /**
+ * Archive icon for archive toggle button.
+ */
+function ArchiveIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth="2"
+      stroke="currentColor"
+      aria-hidden="true"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5m6 4.125 2.25 2.25m0 0 2.25-2.25M12 13.875l-2.25-2.25M12 13.875V21m-8.625-9.75h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"
+      />
+    </svg>
+  )
+}
+
+/**
  * DashboardContent component.
  *
  * Displays the project grid/table with view switching, refresh button,
@@ -128,7 +154,9 @@ export function DashboardContent({
   const [currentSort, setCurrentSort] = React.useState<SortOption>("modified-newest")
   const [selectedTags, setSelectedTags] = React.useState<string[]>([])
   const [searchQuery, setSearchQuery] = React.useState<string>("")
+  const [showArchived, setShowArchived] = React.useState<boolean>(false)
   const { favorites, toggleFavorite } = useFavorites()
+  const { archivedProjects } = useArchive()
 
   // Use the status filters hook for localStorage persistence
   const {
@@ -221,7 +249,7 @@ export function DashboardContent({
   }, [searchFilteredProjects, selectedTags])
 
   // Filter projects by selected statuses
-  const filteredProjects = React.useMemo(() => {
+  const statusFilteredProjects = React.useMemo(() => {
     if (selectedStatusesSet.size === 0) {
       return tagFilteredProjects
     }
@@ -230,6 +258,14 @@ export function DashboardContent({
       return selectedStatusesSet.has(project.status)
     })
   }, [tagFilteredProjects, selectedStatusesSet])
+
+  // Filter archived projects - hide by default unless showArchived is true
+  const filteredProjects = React.useMemo(() => {
+    if (showArchived) {
+      return statusFilteredProjects
+    }
+    return statusFilteredProjects.filter((project) => !archivedProjects.has(project.id))
+  }, [statusFilteredProjects, showArchived, archivedProjects])
 
   // Sort projects based on current sort option with favorites appearing first
   const sortedProjects = React.useMemo(
@@ -273,14 +309,29 @@ export function DashboardContent({
     [sortedProjects, startIndex, endIndex]
   )
 
-  // Split paginated projects into favorites and non-favorites for grid view
-  const { favoriteProjects, nonFavoriteProjects } = React.useMemo(() => {
+  // Split paginated projects into favorites, non-favorites, and archived for grid view
+  const { favoriteProjects, nonFavoriteProjects, archivedProjectsList } = React.useMemo(() => {
     const favSet = new Set(favorites)
+
+    if (showArchived) {
+      // When showing archived, split into archived and non-archived
+      const archived = paginatedProjects.filter((p) => archivedProjects.has(p.id))
+      const nonArchived = paginatedProjects.filter((p) => !archivedProjects.has(p.id))
+
+      return {
+        favoriteProjects: nonArchived.filter((p) => favSet.has(p.id)),
+        nonFavoriteProjects: nonArchived.filter((p) => !favSet.has(p.id)),
+        archivedProjectsList: archived,
+      }
+    }
+
+    // When not showing archived, archived list is empty
     return {
       favoriteProjects: paginatedProjects.filter((p) => favSet.has(p.id)),
       nonFavoriteProjects: paginatedProjects.filter((p) => !favSet.has(p.id)),
+      archivedProjectsList: [],
     }
-  }, [paginatedProjects, favorites])
+  }, [paginatedProjects, favorites, showArchived, archivedProjects])
 
   // Check if any filters are active
   const hasActiveFilters = searchQuery.trim() !== "" || selectedTags.length > 0 || selectedStatusesSet.size > 0
@@ -441,6 +492,24 @@ export function DashboardContent({
                 statusCounts={statusCounts}
               />
 
+              <Button
+                variant={showArchived ? "default" : "outline"}
+                size="sm"
+                onClick={() => setShowArchived(!showArchived)}
+                className="gap-1.5"
+                title={showArchived ? "Hide archived projects" : "Show archived projects"}
+              >
+                <ArchiveIcon className="h-4 w-4" />
+                <span className="hidden sm:inline">
+                  {showArchived ? "Hide Archived" : "Show Archived"}
+                </span>
+                {archivedProjects.size > 0 && (
+                  <Badge variant="secondary" className="ml-1">
+                    {archivedProjects.size}
+                  </Badge>
+                )}
+              </Button>
+
               <SortDropdown
                 currentSort={currentSort}
                 onSortChange={setCurrentSort}
@@ -528,6 +597,38 @@ export function DashboardContent({
                           showDescription
                           showGitInfo
                           isFavorite={false}
+                          onToggle={() => toggleFavorite(project.id)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Separator before archived section */}
+                {archivedProjectsList.length > 0 && (favoriteProjects.length > 0 || nonFavoriteProjects.length > 0) && (
+                  <Separator />
+                )}
+
+                {/* Archived Projects Section */}
+                {archivedProjectsList.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-4">
+                      <h3 className="text-sm font-medium text-muted-foreground">
+                        Archived Projects
+                      </h3>
+                      <Badge variant="secondary">
+                        {archivedProjectsList.length}
+                      </Badge>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 opacity-60">
+                      {archivedProjectsList.map((project) => (
+                        <ProjectCard
+                          key={project.id}
+                          project={project}
+                          viewMode="grid"
+                          showDescription
+                          showGitInfo
+                          isFavorite={favorites.has(project.id)}
                           onToggle={() => toggleFavorite(project.id)}
                         />
                       ))}
