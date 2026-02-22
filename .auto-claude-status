@@ -1,25 +1,25 @@
 {
   "active": true,
-  "spec": "004-favorite-pinned-projects",
-  "state": "building",
+  "spec": "007-pagination",
+  "state": "planning",
   "subtasks": {
-    "completed": 1,
-    "total": 9,
+    "completed": 0,
+    "total": 0,
     "in_progress": 1,
     "failed": 0
   },
   "phase": {
-    "current": "Favorites Storage Layer",
+    "current": "Implementation",
     "id": null,
-    "total": 2
+    "total": 5
   },
   "workers": {
     "active": 0,
     "max": 1
   },
   "session": {
-    "number": 3,
-    "started_at": "2026-02-21T17:04:20.154513"
+    "number": 2,
+    "started_at": "2026-02-21T19:17:24.966439"
   },
-  "last_update": "2026-02-21T17:09:35.645337"
+  "last_update": "2026-02-21T19:20:39.567749"
 }
