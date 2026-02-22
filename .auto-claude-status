@@ -1,25 +1,25 @@
 {
   "active": true,
-  "spec": "006-status-filters",
-  "state": "planning",
+  "spec": "010-dashboard-customization",
+  "state": "building",
   "subtasks": {
-    "completed": 0,
-    "total": 0,
+    "completed": 1,
+    "total": 12,
     "in_progress": 1,
     "failed": 0
   },
   "phase": {
-    "current": "Status Filter Implementation",
+    "current": "Settings Infrastructure",
     "id": null,
-    "total": 5
+    "total": 3
   },
   "workers": {
     "active": 0,
     "max": 1
   },
   "session": {
-    "number": 2,
-    "started_at": "2026-02-21T20:45:33.361501"
+    "number": 3,
+    "started_at": "2026-02-22T11:07:32.630086"
   },
-  "last_update": "2026-02-21T20:49:19.178851"
+  "last_update": "2026-02-22T11:15:09.873554"
 }
