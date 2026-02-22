@@ -25,6 +25,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { type SortOption, sortProjectsWithFavorites } from "@/lib/sort-utils"
 import { useFavorites } from "@/hooks/use-favorites"
+import { useStatusFilters } from "@/hooks/use-status-filters"
 import { usePagination } from "@/hooks/use-pagination"
 
 /**
@@ -126,9 +127,21 @@ export function DashboardContent({
   const router = useRouter()
   const [currentSort, setCurrentSort] = React.useState<SortOption>("modified-newest")
   const [selectedTags, setSelectedTags] = React.useState<string[]>([])
-  const [selectedStatuses, setSelectedStatuses] = React.useState<ProjectStatus[]>([])
   const [searchQuery, setSearchQuery] = React.useState<string>("")
   const { favorites, toggleFavorite } = useFavorites()
+
+  // Use the status filters hook for localStorage persistence
+  const {
+    selectedStatuses: selectedStatusesSet,
+    toggleStatusFilter,
+    clearStatusFilters: clearStatusFiltersHook
+  } = useStatusFilters()
+
+  // Convert Set to Array for component compatibility
+  const selectedStatuses = React.useMemo(
+    () => Array.from(selectedStatusesSet),
+    [selectedStatusesSet]
+  )
 
   const handleRefreshComplete = React.useCallback(() => {
     // Refresh the page to get updated data
@@ -209,14 +222,14 @@ export function DashboardContent({
 
   // Filter projects by selected statuses
   const filteredProjects = React.useMemo(() => {
-    if (selectedStatuses.length === 0) {
+    if (selectedStatusesSet.size === 0) {
       return tagFilteredProjects
     }
     return tagFilteredProjects.filter((project) => {
       // Project must have one of the selected statuses
-      return selectedStatuses.includes(project.status)
+      return selectedStatusesSet.has(project.status)
     })
-  }, [tagFilteredProjects, selectedStatuses])
+  }, [tagFilteredProjects, selectedStatusesSet])
 
   // Sort projects based on current sort option with favorites appearing first
   const sortedProjects = React.useMemo(
@@ -252,7 +265,7 @@ export function DashboardContent({
   // Reset to page 1 when search query or filters change
   React.useEffect(() => {
     goToPageRef.current(1)
-  }, [searchQuery, selectedTags, selectedStatuses])
+  }, [searchQuery, selectedTags, selectedStatusesSet.size])
 
   // Get the current page of projects
   const paginatedProjects = React.useMemo(
@@ -270,29 +283,21 @@ export function DashboardContent({
   }, [paginatedProjects, favorites])
 
   // Check if any filters are active
-  const hasActiveFilters = searchQuery.trim() !== "" || selectedTags.length > 0 || selectedStatuses.length > 0
+  const hasActiveFilters = searchQuery.trim() !== "" || selectedTags.length > 0 || selectedStatusesSet.size > 0
 
   // Handler to clear all filters
   const handleClearFilters = React.useCallback(() => {
     setSearchQuery("")
     setSelectedTags([])
-    setSelectedStatuses([])
-  }, [])
+    clearStatusFiltersHook()
+  }, [clearStatusFiltersHook])
 
   // Handler to toggle a status filter when clicking a status card
   const handleStatusCardClick = React.useCallback(
     (status: ProjectStatus) => {
-      setSelectedStatuses((prev) => {
-        if (prev.includes(status)) {
-          // Remove status if already selected
-          return prev.filter((s) => s !== status)
-        } else {
-          // Add status if not selected
-          return [...prev, status]
-        }
-      })
+      toggleStatusFilter(status)
     },
-    []
+    [toggleStatusFilter]
   )
 
   if (projects.length === 0) {
@@ -427,7 +432,12 @@ export function DashboardContent({
               <StatusFilter
                 availableStatuses={availableStatuses}
                 selectedStatuses={selectedStatuses}
-                onStatusesChange={setSelectedStatuses}
+                onStatusesChange={(statuses) => {
+                  // Clear all current filters first
+                  clearStatusFiltersHook()
+                  // Then add each selected status
+                  statuses.forEach(status => toggleStatusFilter(status))
+                }}
                 statusCounts={statusCounts}
               />
 

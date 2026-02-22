@@ -76,7 +76,6 @@ export function StatusFilter({ availableStatuses, selectedStatuses, onStatusesCh
             const count = statusCounts?.get(status)
             const label = statusLabels[status]
             const icon = statusIcons[status]
-            const displayText = count ? `${label} (${count})` : label
 
             return (
               <DropdownMenuCheckboxItem
