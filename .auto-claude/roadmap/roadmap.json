@@ -192,7 +192,7 @@
       "impact": "high",
       "phase_id": "phase-1",
       "dependencies": [],
-      "status": "planned",
+      "status": "done",
       "acceptance_criteria": [
         "Filter buttons for each status type (active, stale, clean, dirty, unknown)",
         "Clicking a filter shows only projects with that status",
@@ -206,6 +206,8 @@
         "As a developer, I want to filter by 'stale' status so that I can identify projects I've neglected"
       ],
       "linked_spec_id": "006-status-filters",
+      "task_outcome": "completed",
+      "previous_status": "planned",
       "competitor_insight_ids": []
     },
     {
@@ -491,7 +493,7 @@
       "impact": "medium",
       "phase_id": "phase-4",
       "dependencies": [],
-      "status": "under_review",
+      "status": "planned",
       "acceptance_criteria": [
         "Settings panel accessible from dashboard",
         "Default view mode preference (grid/table)",
@@ -505,6 +507,7 @@
         "As a user, I want to customize my dashboard so that it shows exactly what I need",
         "As a developer, I want to hide status cards I don't care about so that I can focus"
       ],
+      "linked_spec_id": "010-dashboard-customization",
       "competitor_insight_ids": []
     },
     {
@@ -517,7 +520,7 @@
       "impact": "medium",
       "phase_id": "phase-4",
       "dependencies": [],
-      "status": "under_review",
+      "status": "done",
       "acceptance_criteria": [
         "Archive action available on project cards",
         "Archived projects hidden from main view by default",
@@ -530,6 +533,9 @@
         "As a developer, I want to archive old projects so that my dashboard stays focused on current work",
         "As a user, I want to unarchive a project if I return to it"
       ],
+      "linked_spec_id": "009-project-archive-hide",
+      "task_outcome": "completed",
+      "previous_status": "planned",
       "competitor_insight_ids": []
     },
     {
@@ -588,7 +594,7 @@
   ],
   "metadata": {
     "created_at": "2025-02-20T17:05:00Z",
-    "updated_at": "2026-02-22T03:00:00.000Z",
+    "updated_at": "2026-02-22T17:49:03.939Z",
     "generated_by": "roadmap_features agent",
     "prioritization_framework": "MoSCoW",
     "competitor_analysis_used": false
