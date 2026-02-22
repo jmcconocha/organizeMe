@@ -15,7 +15,10 @@ import {
 } from "@/components/ui/table"
 import { StatusBadge } from "@/components/status-badge"
 import { FavoriteButton } from "@/components/favorite-button"
+import { Badge } from "@/components/ui/badge"
 import { useFavorites } from "@/hooks/use-favorites"
+import { useDashboardSettings } from "@/hooks/use-dashboard-settings"
+import type { TableColumn as TableColumnType } from "@/types/dashboard-settings"
 
 /**
  * Column definitions for the project table.
@@ -32,6 +35,7 @@ const columns: TableColumn[] = [
   { key: "status", label: "Status", className: "w-[100px]" },
   { key: "name", label: "Name", className: "min-w-[150px]" },
   { key: "branch", label: "Branch", className: "w-[140px]" },
+  { key: "tags", label: "Tags", className: "w-[180px]" },
   { key: "changes", label: "Changes", className: "w-[100px] text-center" },
   { key: "modified", label: "Last Modified", className: "w-[140px]" },
   { key: "indicators", label: "", className: "w-[60px]" },
@@ -145,6 +149,31 @@ const ProjectTable = React.forwardRef<HTMLDivElement, ProjectTableProps>(
     ref
   ) => {
     const { isFavorite, toggleFavorite } = useFavorites()
+    const { settings } = useDashboardSettings()
+
+    // Filter columns based on settings
+    // Always show: favorite, changes, indicators
+    // Conditionally show based on settings: status, name, branch, tags, modified
+    const visibleColumns = React.useMemo(() => {
+      return columns.filter((column) => {
+        // Always visible columns
+        if (column.key === "favorite" || column.key === "changes" || column.key === "indicators") {
+          return true
+        }
+        // Conditionally visible columns based on settings
+        // Check if the column key is a valid configurable column type
+        const validColumns: TableColumnType[] = ['name', 'status', 'branch', 'tags', 'modified']
+        if (validColumns.includes(column.key as TableColumnType)) {
+          return settings.tableColumns.includes(column.key as TableColumnType)
+        }
+        return false
+      })
+    }, [settings.tableColumns])
+
+    // Helper function to check if a column is visible
+    const isColumnVisible = React.useCallback((columnKey: string) => {
+      return visibleColumns.some(col => col.key === columnKey)
+    }, [visibleColumns])
 
     if (projects.length === 0 && showEmptyState) {
       return (
@@ -166,7 +195,7 @@ const ProjectTable = React.forwardRef<HTMLDivElement, ProjectTableProps>(
         <Table>
           <TableHeader>
             <TableRow>
-              {columns.map((column) => (
+              {visibleColumns.map((column) => (
                 <TableHead key={column.key} className={column.className}>
                   {column.label}
                 </TableHead>
@@ -187,108 +216,151 @@ const ProjectTable = React.forwardRef<HTMLDivElement, ProjectTableProps>(
                 >
 
                   {/* Favorite Column */}
-                  <TableCell className="py-3">
-                    <FavoriteButton
-                      isFavorite={isProjectFavorite}
-                      onToggle={() => toggleFavorite(project.id)}
-                      size="sm"
-                    />
-                  </TableCell>
-
-                {/* Status Column */}
-                <TableCell className="py-3">
-                  <StatusBadge
-                    status={project.status}
-                    showIcon={true}
-                    showLabel={true}
-                  />
-                </TableCell>
-
-                {/* Name Column */}
-                <TableCell className="py-3">
-                  <Link
-                    href={`/projects/${encodeURIComponent(project.id)}`}
-                    className="font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <span className="truncate max-w-[250px] block" title={project.name}>
-                      {project.name}
-                    </span>
-                  </Link>
-                  {project.description && (
-                    <p
-                      className="text-xs text-muted-foreground truncate max-w-[250px] mt-0.5"
-                      title={project.description}
-                    >
-                      {project.description}
-                    </p>
+                  {isColumnVisible("favorite") && (
+                    <TableCell className="py-3">
+                      <FavoriteButton
+                        isFavorite={isProjectFavorite}
+                        onToggle={() => toggleFavorite(project.id)}
+                        size="sm"
+                      />
+                    </TableCell>
                   )}
-                </TableCell>
 
-                {/* Branch Column */}
-                <TableCell className="py-3">
-                  {project.gitInfo ? (
-                    <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
-                      <BranchIcon className="h-3.5 w-3.5 flex-shrink-0" />
-                      <span
-                        className="truncate max-w-[100px]"
-                        title={project.gitInfo.branch}
-                      >
-                        {project.gitInfo.branch}
-                      </span>
-                    </span>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">No Git</span>
+                  {/* Status Column */}
+                  {isColumnVisible("status") && (
+                    <TableCell className="py-3">
+                      <StatusBadge
+                        status={project.status}
+                        showIcon={true}
+                        showLabel={true}
+                      />
+                    </TableCell>
                   )}
-                </TableCell>
 
-                {/* Changes Column */}
-                <TableCell className="py-3 text-center">
-                  {project.gitInfo?.isDirty ? (
-                    <span className="inline-flex items-center justify-center min-w-[24px] px-1.5 py-0.5 text-xs font-medium rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200">
-                      {project.gitInfo.uncommittedChanges}
-                    </span>
-                  ) : project.gitInfo ? (
-                    <span className="text-xs text-muted-foreground">—</span>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">—</span>
+                  {/* Name Column */}
+                  {isColumnVisible("name") && (
+                    <TableCell className="py-3">
+                      <Link
+                        href={`/projects/${encodeURIComponent(project.id)}`}
+                        className="font-medium hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <span className="truncate max-w-[250px] block" title={project.name}>
+                          {project.name}
+                        </span>
+                      </Link>
+                      {project.description && (
+                        <p
+                          className="text-xs text-muted-foreground truncate max-w-[250px] mt-0.5"
+                          title={project.description}
+                        >
+                          {project.description}
+                        </p>
+                      )}
+                    </TableCell>
                   )}
-                </TableCell>
 
-                {/* Last Modified Column */}
-                <TableCell className="py-3">
-                  <span
-                    className="text-sm text-muted-foreground"
-                    title={new Date(project.lastModified).toLocaleString()}
-                  >
-                    {formatRelativeTime(project.lastModified)}
-                  </span>
-                </TableCell>
+                  {/* Branch Column */}
+                  {isColumnVisible("branch") && (
+                    <TableCell className="py-3">
+                      {project.gitInfo ? (
+                        <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
+                          <BranchIcon className="h-3.5 w-3.5 flex-shrink-0" />
+                          <span
+                            className="truncate max-w-[100px]"
+                            title={project.gitInfo.branch}
+                          >
+                            {project.gitInfo.branch}
+                          </span>
+                        </span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">No Git</span>
+                      )}
+                    </TableCell>
+                  )}
 
-                {/* Indicators Column */}
-                <TableCell className="py-3">
-                  <div className="flex items-center gap-1">
-                    {project.hasPackageJson && (
+                  {/* Tags Column */}
+                  {isColumnVisible("tags") && (
+                    <TableCell className="py-3">
+                      {project.tags && project.tags.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {project.tags.slice(0, 3).map((tag) => (
+                            <Badge
+                              key={tag}
+                              variant="secondary"
+                              className="text-xs px-2 py-0"
+                            >
+                              {tag}
+                            </Badge>
+                          ))}
+                          {project.tags.length > 3 && (
+                            <Badge
+                              variant="outline"
+                              className="text-xs px-2 py-0"
+                            >
+                              +{project.tags.length - 3}
+                            </Badge>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
+                  )}
+
+                  {/* Changes Column */}
+                  {isColumnVisible("changes") && (
+                    <TableCell className="py-3 text-center">
+                      {project.gitInfo?.isDirty ? (
+                        <span className="inline-flex items-center justify-center min-w-[24px] px-1.5 py-0.5 text-xs font-medium rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200">
+                          {project.gitInfo.uncommittedChanges}
+                        </span>
+                      ) : project.gitInfo ? (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
+                  )}
+
+                  {/* Last Modified Column */}
+                  {isColumnVisible("modified") && (
+                    <TableCell className="py-3">
                       <span
-                        className="inline-flex items-center justify-center w-5 h-5 rounded bg-secondary text-xs"
-                        title="Has package.json"
-                        aria-label="Has package.json"
+                        className="text-sm text-muted-foreground"
+                        title={new Date(project.lastModified).toLocaleString()}
                       >
-                        📦
+                        {formatRelativeTime(project.lastModified)}
                       </span>
-                    )}
-                    {project.hasReadme && (
-                      <span
-                        className="inline-flex items-center justify-center w-5 h-5 rounded bg-secondary text-xs"
-                        title="Has README"
-                        aria-label="Has README"
-                      >
-                        📄
-                      </span>
-                    )}
-                  </div>
-                </TableCell>
-              </TableRow>
+                    </TableCell>
+                  )}
+
+                  {/* Indicators Column */}
+                  {isColumnVisible("indicators") && (
+                    <TableCell className="py-3">
+                      <div className="flex items-center gap-1">
+                        {project.hasPackageJson && (
+                          <span
+                            className="inline-flex items-center justify-center w-5 h-5 rounded bg-secondary text-xs"
+                            title="Has package.json"
+                            aria-label="Has package.json"
+                          >
+                            📦
+                          </span>
+                        )}
+                        {project.hasReadme && (
+                          <span
+                            className="inline-flex items-center justify-center w-5 h-5 rounded bg-secondary text-xs"
+                            title="Has README"
+                            aria-label="Has README"
+                          >
+                            📄
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
+                  )}
+                </TableRow>
               )
             })}
           </TableBody>

@@ -20,6 +20,7 @@ import { StatusBadge } from "@/components/status-badge"
 import { StatusFilter } from "@/components/status-filter"
 import { TagFilter } from "@/components/tag-filter"
 import { PaginationControls } from "@/components/pagination-controls"
+import { DashboardSettingsDialog } from "@/components/dashboard-settings-dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
@@ -28,6 +29,7 @@ import { useFavorites } from "@/hooks/use-favorites"
 import { useStatusFilters } from "@/hooks/use-status-filters"
 import { usePagination } from "@/hooks/use-pagination"
 import { useArchive } from "@/hooks/use-archive"
+import { useDashboardSettings } from "@/hooks/use-dashboard-settings"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 
@@ -157,6 +159,7 @@ export function DashboardContent({
   const [showArchived, setShowArchived] = React.useState<boolean>(false)
   const { favorites, toggleFavorite } = useFavorites()
   const { archivedProjects, toggleArchive } = useArchive()
+  const { settings } = useDashboardSettings()
 
   // Use the status filters hook for localStorage persistence
   const {
@@ -393,11 +396,13 @@ export function DashboardContent({
           </Card>
 
           {/* Status Cards */}
-          {statusOrder.map((status) => {
-            const count = statusSummary[status]
-            if (count === 0) return null
+          {statusOrder
+            .filter((status) => settings.visibleStatusCards.includes(status))
+            .map((status) => {
+              const count = statusSummary[status]
+              if (count === 0) return null
 
-            const isActive = selectedStatuses.includes(status)
+              const isActive = selectedStatuses.includes(status)
 
             return (
               <Card
@@ -441,7 +446,7 @@ export function DashboardContent({
 
       {/* Projects View */}
       <section aria-labelledby="projects-heading">
-        <Tabs defaultValue="grid" className="w-full">
+        <Tabs defaultValue={settings.defaultView} className="w-full">
           {/* Toolbar */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
             <div className="flex items-center gap-2">
@@ -515,6 +520,8 @@ export function DashboardContent({
                 onSortChange={setCurrentSort}
               />
 
+              <DashboardSettingsDialog />
+
               <RefreshButton
                 size="sm"
                 onRefreshComplete={handleRefreshComplete}
@@ -560,6 +567,7 @@ export function DashboardContent({
                           key={project.id}
                           project={project}
                           viewMode="grid"
+                          density={settings.cardDensity}
                           showDescription
                           showGitInfo
                           isFavorite={true}
@@ -596,6 +604,7 @@ export function DashboardContent({
                           key={project.id}
                           project={project}
                           viewMode="grid"
+                          density={settings.cardDensity}
                           showDescription
                           showGitInfo
                           isFavorite={false}
@@ -630,6 +639,7 @@ export function DashboardContent({
                           key={project.id}
                           project={project}
                           viewMode="grid"
+                          density={settings.cardDensity}
                           showDescription
                           showGitInfo
                           isFavorite={favorites.has(project.id)}

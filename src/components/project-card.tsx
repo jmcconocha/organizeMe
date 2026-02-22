@@ -6,6 +6,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 import type { Project } from "@/types/project"
+import type { CardDensity } from "@/types/dashboard-settings"
 import {
   Card,
   CardContent,
@@ -22,9 +23,12 @@ import { FavoriteButton } from "@/components/favorite-button"
 import { ArchiveButton } from "@/components/archive-button"
 
 /**
- * View mode variants for the project card.
+ * View mode and density variants for the project card.
  * - grid: Compact card layout for grid views
  * - list: Horizontal layout for list views
+ * - compact: Reduced padding and smaller text for information density
+ * - comfortable: Balanced spacing and readability (default)
+ * - spacious: Increased padding and larger text for accessibility
  */
 const projectCardVariants = cva("group transition-all duration-200", {
   variants: {
@@ -32,9 +36,15 @@ const projectCardVariants = cva("group transition-all duration-200", {
       grid: "flex flex-col",
       list: "flex flex-row items-center",
     },
+    density: {
+      compact: "",
+      comfortable: "",
+      spacious: "",
+    },
   },
   defaultVariants: {
     viewMode: "grid",
+    density: "comfortable",
   },
 })
 
@@ -55,6 +65,8 @@ export interface ProjectCardProps
   isArchived?: boolean
   /** Callback when archive status is toggled */
   onArchiveToggle?: () => void
+  /** Card density setting - affects spacing, padding, and font sizes */
+  density?: CardDensity
 }
 
 /**
@@ -118,6 +130,7 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
       className,
       project,
       viewMode = "grid",
+      density = "comfortable",
       showDescription = true,
       showGitInfo = true,
       isFavorite = false,
@@ -130,12 +143,51 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
   ) => {
     const isGridView = viewMode === "grid"
 
+    // Density-specific class mappings
+    const densityClasses = {
+      header: {
+        compact: "pb-1",
+        comfortable: "pb-2",
+        spacious: "pb-3",
+      },
+      title: {
+        compact: "text-base",
+        comfortable: "text-lg",
+        spacious: "text-xl",
+      },
+      description: {
+        compact: "text-xs",
+        comfortable: "text-sm",
+        spacious: "text-base",
+      },
+      content: {
+        compact: "pb-1 text-xs",
+        comfortable: "pb-2 text-sm",
+        spacious: "pb-3 text-base",
+      },
+      footer: {
+        compact: "pt-1 pb-2 text-[10px]",
+        comfortable: "pt-2 pb-4 text-xs",
+        spacious: "pt-3 pb-5 text-sm",
+      },
+      tags: {
+        compact: "gap-0.5 mt-1",
+        comfortable: "gap-1 mt-2",
+        spacious: "gap-1.5 mt-3",
+      },
+      badge: {
+        compact: "text-[10px] px-1 py-0",
+        comfortable: "text-xs",
+        spacious: "text-sm px-2.5 py-0.5",
+      },
+    }
+
     return (
       <Link href={`/projects/${encodeURIComponent(project.id)}`} className="block">
         <Card
           ref={ref}
           className={cn(
-            projectCardVariants({ viewMode }),
+            projectCardVariants({ viewMode, density }),
             "hover:border-primary/50 hover:shadow-md cursor-pointer",
             isFavorite && "border-primary/30 bg-primary/5 dark:bg-primary/10",
             className
@@ -145,10 +197,10 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
           {isGridView ? (
             // Grid View Layout
             <>
-              <CardHeader className="pb-2">
+              <CardHeader className={densityClasses.header[density]}>
                 <div className="flex items-start justify-between gap-2">
                   <CardTitle
-                    className="text-lg truncate"
+                    className={cn(densityClasses.title[density], "truncate")}
                     title={project.name}
                   >
                     {project.name}
@@ -168,14 +220,14 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
                   </div>
                 </div>
                 {showDescription && project.description && (
-                  <CardDescription className="line-clamp-2">
+                  <CardDescription className={cn(densityClasses.description[density], "line-clamp-2")}>
                     {project.description}
                   </CardDescription>
                 )}
               </CardHeader>
-              <CardContent className="pb-2 flex-1">
+              <CardContent className={cn(densityClasses.content[density], "flex-1")}>
                 {showGitInfo && project.gitInfo && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2 text-muted-foreground">
                     <span className="inline-flex items-center gap-1">
                       <BranchIcon className="h-3 w-3" />
                       <span className="truncate max-w-[120px]" title={project.gitInfo.branch}>
@@ -190,19 +242,19 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
                   </div>
                 )}
                 {!project.gitInfo && (
-                  <span className="text-xs text-muted-foreground">No Git</span>
+                  <span className="text-muted-foreground">No Git</span>
                 )}
                 {project.tags && project.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-2">
+                  <div className={cn("flex flex-wrap", densityClasses.tags[density])}>
                     {project.tags.map((tag) => (
-                      <Badge key={tag} className={cn("border", getTagColor(tag))}>
+                      <Badge key={tag} className={cn("border", densityClasses.badge[density], getTagColor(tag))}>
                         {tag}
                       </Badge>
                     ))}
                   </div>
                 )}
               </CardContent>
-              <CardFooter className="pt-2 pb-4 flex items-center justify-between text-xs text-muted-foreground">
+              <CardFooter className={cn(densityClasses.footer[density], "flex items-center justify-between text-muted-foreground")}>
                 <span title={new Date(project.lastModified).toLocaleString()}>
                   {formatRelativeTime(project.lastModified)}
                 </span>
@@ -244,7 +296,10 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
           ) : (
             // List View Layout
             <>
-              <div className="flex-shrink-0 p-4 flex items-center gap-2">
+              <div className={cn(
+                "flex-shrink-0 flex items-center gap-2",
+                density === "compact" ? "p-2" : density === "spacious" ? "p-5" : "p-4"
+              )}>
                 <FavoriteButton
                   isFavorite={isFavorite}
                   onToggle={onToggle}
@@ -257,16 +312,22 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
                 />
                 <StatusBadge status={project.status} showLabel={false} />
               </div>
-              <CardHeader className="flex-1 py-4 pl-0">
+              <CardHeader className={cn(
+                "flex-1 pl-0",
+                density === "compact" ? "py-2" : density === "spacious" ? "py-5" : "py-4"
+              )}>
                 <div className="flex items-center gap-4">
                   <CardTitle
-                    className="text-base truncate max-w-[200px]"
+                    className={cn(
+                      "truncate max-w-[200px]",
+                      densityClasses.title[density]
+                    )}
                     title={project.name}
                   >
                     {project.name}
                   </CardTitle>
                   {showGitInfo && project.gitInfo && (
-                    <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                    <span className={cn("inline-flex items-center gap-1 text-muted-foreground", densityClasses.content[density])}>
                       <BranchIcon className="h-3 w-3" />
                       <span className="truncate max-w-[100px]" title={project.gitInfo.branch}>
                         {project.gitInfo.branch}
@@ -274,12 +335,12 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
                     </span>
                   )}
                   {!project.gitInfo && (
-                    <span className="text-xs text-muted-foreground">No Git</span>
+                    <span className={cn("text-muted-foreground", densityClasses.content[density])}>No Git</span>
                   )}
                   {project.tags && project.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1">
                       {project.tags.map((tag) => (
-                        <Badge key={tag} className={cn("border", getTagColor(tag))}>
+                        <Badge key={tag} className={cn("border", densityClasses.badge[density], getTagColor(tag))}>
                           {tag}
                         </Badge>
                       ))}
@@ -287,12 +348,15 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
                   )}
                 </div>
                 {showDescription && project.description && (
-                  <CardDescription className="truncate max-w-[300px]">
+                  <CardDescription className={cn("truncate max-w-[300px]", densityClasses.description[density])}>
                     {project.description}
                   </CardDescription>
                 )}
               </CardHeader>
-              <div className="flex items-center gap-4 px-4 py-4 text-xs text-muted-foreground">
+              <div className={cn(
+                "flex items-center gap-4 text-muted-foreground",
+                density === "compact" ? "px-2 py-2 text-[10px]" : density === "spacious" ? "px-5 py-5 text-sm" : "px-4 py-4 text-xs"
+              )}>
                 {project.gitInfo?.isDirty && (
                   <span className="text-amber-600 dark:text-amber-400">
                     {project.gitInfo.uncommittedChanges} changes
