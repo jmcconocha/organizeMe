@@ -17,6 +17,7 @@ import { RefreshButton } from "@/components/refresh-button"
 import { SearchBar } from "@/components/search-bar"
 import { SortDropdown } from "@/components/sort-dropdown"
 import { StatusBadge } from "@/components/status-badge"
+import { StatusFilter } from "@/components/status-filter"
 import { TagFilter } from "@/components/tag-filter"
 import { PaginationControls } from "@/components/pagination-controls"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -125,6 +126,7 @@ export function DashboardContent({
   const router = useRouter()
   const [currentSort, setCurrentSort] = React.useState<SortOption>("modified-newest")
   const [selectedTags, setSelectedTags] = React.useState<string[]>([])
+  const [selectedStatuses, setSelectedStatuses] = React.useState<ProjectStatus[]>([])
   const [searchQuery, setSearchQuery] = React.useState<string>("")
   const { favorites, toggleFavorite } = useFavorites()
 
@@ -159,6 +161,25 @@ export function DashboardContent({
     }
   }, [projects])
 
+  // Collect all unique statuses from all projects and count their usage
+  const { availableStatuses, statusCounts } = React.useMemo(() => {
+    const statusesSet = new Set<ProjectStatus>()
+    const counts = new Map<ProjectStatus, number>()
+
+    projects.forEach((project) => {
+      statusesSet.add(project.status)
+      counts.set(project.status, (counts.get(project.status) || 0) + 1)
+    })
+
+    // Sort statuses by the defined order
+    const sortedStatuses = statusOrder.filter((status) => statusesSet.has(status))
+
+    return {
+      availableStatuses: sortedStatuses,
+      statusCounts: counts,
+    }
+  }, [projects])
+
   // Filter projects by search query
   const searchFilteredProjects = React.useMemo(() => {
     if (!searchQuery || searchQuery.trim() === "") {
@@ -176,7 +197,7 @@ export function DashboardContent({
   }, [projects, searchQuery])
 
   // Filter projects by selected tags
-  const filteredProjects = React.useMemo(() => {
+  const tagFilteredProjects = React.useMemo(() => {
     if (selectedTags.length === 0) {
       return searchFilteredProjects
     }
@@ -185,6 +206,17 @@ export function DashboardContent({
       return project.tags?.some((tag) => selectedTags.includes(tag))
     })
   }, [searchFilteredProjects, selectedTags])
+
+  // Filter projects by selected statuses
+  const filteredProjects = React.useMemo(() => {
+    if (selectedStatuses.length === 0) {
+      return tagFilteredProjects
+    }
+    return tagFilteredProjects.filter((project) => {
+      // Project must have one of the selected statuses
+      return selectedStatuses.includes(project.status)
+    })
+  }, [tagFilteredProjects, selectedStatuses])
 
   // Sort projects based on current sort option with favorites appearing first
   const sortedProjects = React.useMemo(
@@ -217,10 +249,10 @@ export function DashboardContent({
     goToPageRef.current = goToPage
   })
 
-  // Reset to page 1 when search query or tag filters change
+  // Reset to page 1 when search query or filters change
   React.useEffect(() => {
     goToPageRef.current(1)
-  }, [searchQuery, selectedTags])
+  }, [searchQuery, selectedTags, selectedStatuses])
 
   // Get the current page of projects
   const paginatedProjects = React.useMemo(
@@ -238,12 +270,13 @@ export function DashboardContent({
   }, [paginatedProjects, favorites])
 
   // Check if any filters are active
-  const hasActiveFilters = searchQuery.trim() !== "" || selectedTags.length > 0
+  const hasActiveFilters = searchQuery.trim() !== "" || selectedTags.length > 0 || selectedStatuses.length > 0
 
   // Handler to clear all filters
   const handleClearFilters = React.useCallback(() => {
     setSearchQuery("")
     setSelectedTags([])
+    setSelectedStatuses([])
   }, [])
 
   if (projects.length === 0) {
@@ -355,6 +388,13 @@ export function DashboardContent({
                 selectedTags={selectedTags}
                 onTagsChange={setSelectedTags}
                 tagCounts={tagCounts}
+              />
+
+              <StatusFilter
+                availableStatuses={availableStatuses}
+                selectedStatuses={selectedStatuses}
+                onStatusesChange={setSelectedStatuses}
+                statusCounts={statusCounts}
               />
 
               <SortDropdown
