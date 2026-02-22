@@ -1,15 +1,15 @@
 {
   "active": true,
-  "spec": "007-pagination",
-  "state": "building",
+  "spec": "006-status-filters",
+  "state": "planning",
   "subtasks": {
-    "completed": 4,
-    "total": 5,
+    "completed": 0,
+    "total": 0,
     "in_progress": 1,
     "failed": 0
   },
   "phase": {
-    "current": "Implementation",
+    "current": "Status Filter Implementation",
     "id": null,
     "total": 5
   },
@@ -18,8 +18,8 @@
     "max": 1
   },
   "session": {
-    "number": 6,
-    "started_at": "2026-02-21T19:17:24.966439"
+    "number": 2,
+    "started_at": "2026-02-21T20:45:33.361501"
   },
-  "last_update": "2026-02-21T19:30:44.511571"
+  "last_update": "2026-02-21T20:49:19.178851"
 }

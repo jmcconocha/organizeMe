@@ -17,6 +17,7 @@ import { RefreshButton } from "@/components/refresh-button"
 import { SearchBar } from "@/components/search-bar"
 import { SortDropdown } from "@/components/sort-dropdown"
 import { StatusBadge } from "@/components/status-badge"
+import { StatusFilter } from "@/components/status-filter"
 import { TagFilter } from "@/components/tag-filter"
 import { PaginationControls } from "@/components/pagination-controls"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -24,6 +25,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { type SortOption, sortProjectsWithFavorites } from "@/lib/sort-utils"
 import { useFavorites } from "@/hooks/use-favorites"
+import { useStatusFilters } from "@/hooks/use-status-filters"
 import { usePagination } from "@/hooks/use-pagination"
 
 /**
@@ -128,6 +130,19 @@ export function DashboardContent({
   const [searchQuery, setSearchQuery] = React.useState<string>("")
   const { favorites, toggleFavorite } = useFavorites()
 
+  // Use the status filters hook for localStorage persistence
+  const {
+    selectedStatuses: selectedStatusesSet,
+    toggleStatusFilter,
+    clearStatusFilters: clearStatusFiltersHook
+  } = useStatusFilters()
+
+  // Convert Set to Array for component compatibility
+  const selectedStatuses = React.useMemo(
+    () => Array.from(selectedStatusesSet),
+    [selectedStatusesSet]
+  )
+
   const handleRefreshComplete = React.useCallback(() => {
     // Refresh the page to get updated data
     router.refresh()
@@ -159,6 +174,25 @@ export function DashboardContent({
     }
   }, [projects])
 
+  // Collect all unique statuses from all projects and count their usage
+  const { availableStatuses, statusCounts } = React.useMemo(() => {
+    const statusesSet = new Set<ProjectStatus>()
+    const counts = new Map<ProjectStatus, number>()
+
+    projects.forEach((project) => {
+      statusesSet.add(project.status)
+      counts.set(project.status, (counts.get(project.status) || 0) + 1)
+    })
+
+    // Sort statuses by the defined order
+    const sortedStatuses = statusOrder.filter((status) => statusesSet.has(status))
+
+    return {
+      availableStatuses: sortedStatuses,
+      statusCounts: counts,
+    }
+  }, [projects])
+
   // Filter projects by search query
   const searchFilteredProjects = React.useMemo(() => {
     if (!searchQuery || searchQuery.trim() === "") {
@@ -176,7 +210,7 @@ export function DashboardContent({
   }, [projects, searchQuery])
 
   // Filter projects by selected tags
-  const filteredProjects = React.useMemo(() => {
+  const tagFilteredProjects = React.useMemo(() => {
     if (selectedTags.length === 0) {
       return searchFilteredProjects
     }
@@ -185,6 +219,17 @@ export function DashboardContent({
       return project.tags?.some((tag) => selectedTags.includes(tag))
     })
   }, [searchFilteredProjects, selectedTags])
+
+  // Filter projects by selected statuses
+  const filteredProjects = React.useMemo(() => {
+    if (selectedStatusesSet.size === 0) {
+      return tagFilteredProjects
+    }
+    return tagFilteredProjects.filter((project) => {
+      // Project must have one of the selected statuses
+      return selectedStatusesSet.has(project.status)
+    })
+  }, [tagFilteredProjects, selectedStatusesSet])
 
   // Sort projects based on current sort option with favorites appearing first
   const sortedProjects = React.useMemo(
@@ -217,10 +262,10 @@ export function DashboardContent({
     goToPageRef.current = goToPage
   })
 
-  // Reset to page 1 when search query or tag filters change
+  // Reset to page 1 when search query or filters change
   React.useEffect(() => {
     goToPageRef.current(1)
-  }, [searchQuery, selectedTags])
+  }, [searchQuery, selectedTags, selectedStatusesSet.size])
 
   // Get the current page of projects
   const paginatedProjects = React.useMemo(
@@ -238,13 +283,22 @@ export function DashboardContent({
   }, [paginatedProjects, favorites])
 
   // Check if any filters are active
-  const hasActiveFilters = searchQuery.trim() !== "" || selectedTags.length > 0
+  const hasActiveFilters = searchQuery.trim() !== "" || selectedTags.length > 0 || selectedStatusesSet.size > 0
 
   // Handler to clear all filters
   const handleClearFilters = React.useCallback(() => {
     setSearchQuery("")
     setSelectedTags([])
-  }, [])
+    clearStatusFiltersHook()
+  }, [clearStatusFiltersHook])
+
+  // Handler to toggle a status filter when clicking a status card
+  const handleStatusCardClick = React.useCallback(
+    (status: ProjectStatus) => {
+      toggleStatusFilter(status)
+    },
+    [toggleStatusFilter]
+  )
 
   if (projects.length === 0) {
     return (
@@ -292,8 +346,26 @@ export function DashboardContent({
             const count = statusSummary[status]
             if (count === 0) return null
 
+            const isActive = selectedStatuses.includes(status)
+
             return (
-              <Card key={status}>
+              <Card
+                key={status}
+                className={`cursor-pointer transition-all hover:shadow-md ${
+                  isActive
+                    ? "ring-2 ring-primary shadow-md"
+                    : "hover:border-muted-foreground/50"
+                }`}
+                onClick={() => handleStatusCardClick(status)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault()
+                    handleStatusCardClick(status)
+                  }
+                }}
+              >
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                     <StatusBadge
@@ -355,6 +427,18 @@ export function DashboardContent({
                 selectedTags={selectedTags}
                 onTagsChange={setSelectedTags}
                 tagCounts={tagCounts}
+              />
+
+              <StatusFilter
+                availableStatuses={availableStatuses}
+                selectedStatuses={selectedStatuses}
+                onStatusesChange={(statuses) => {
+                  // Clear all current filters first
+                  clearStatusFiltersHook()
+                  // Then add each selected status
+                  statuses.forEach(status => toggleStatusFilter(status))
+                }}
+                statusCounts={statusCounts}
               />
 
               <SortDropdown
