@@ -11,6 +11,14 @@
     "build:web": "npm run build -w @organizeme/web",
     "dev:desktop": "npm run tauri:dev -w @organizeme/desktop",
     "build:desktop": "npm run tauri:build -w @organizeme/desktop",
-    "lint": "npm run lint -w @organizeme/web"
+    "lint": "npm run lint -w @organizeme/web",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "jsdom": "^28.1.0",
+    "vitest": "^4.0.18"
   }
 }
