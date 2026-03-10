@@ -52,6 +52,10 @@ export interface DataProvider {
   removeProjectTag(projectId: string, tag: string): Promise<TagResult>
   /** Get all available tags */
   getAllTags(): Promise<string[]>
+  /** Get notes for a project */
+  getProjectNotes(projectId: string): Promise<string>
+  /** Save notes for a project */
+  saveProjectNotes(projectId: string, notes: string): Promise<AppResult>
   /** Get application settings from config file */
   getAppSettings(): Promise<AppSettings>
   /** Update application settings in config file */

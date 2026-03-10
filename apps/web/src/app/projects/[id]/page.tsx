@@ -20,7 +20,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@orga
 import { ProjectDetailActions } from "./project-detail-actions"
 import { MarkdownRenderer } from "@organizeme/ui/components/markdown-renderer"
 import { ProjectTagsWrapper } from "./project-tags-wrapper"
+import { ProjectNotesWrapper } from "./project-notes-wrapper"
 import { getAllTags } from "@/lib/tag-storage"
+import { getProjectNotes } from "@/lib/note-storage"
 
 interface ProjectDetailPageProps {
   params: Promise<{ id: string }>
@@ -180,8 +182,11 @@ async function ProjectDetailContent({ id }: { id: string }) {
     notFound()
   }
 
-  // Get all available tags for autocomplete
-  const allTags = await getAllTags()
+  // Get all available tags and project notes in parallel
+  const [allTags, projectNotes] = await Promise.all([
+    getAllTags(),
+    getProjectNotes(project.id),
+  ])
 
   return (
     <div className="space-y-6">
@@ -343,6 +348,12 @@ async function ProjectDetailContent({ id }: { id: string }) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Project Notes */}
+      <ProjectNotesWrapper
+        projectId={project.id}
+        initialNotes={projectNotes}
+      />
 
       {/* README Content */}
       {project.readmeContent && (
