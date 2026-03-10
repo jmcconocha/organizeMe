@@ -11,13 +11,15 @@ interface SearchBarProps {
   onChange: (value: string) => void
   placeholder?: string
   debounceMs?: number
+  inputRef?: React.RefObject<HTMLInputElement | null>
 }
 
 export function SearchBar({
   value,
   onChange,
   placeholder = "Search projects...",
-  debounceMs = 300
+  debounceMs = 300,
+  inputRef,
 }: SearchBarProps) {
   const [mounted, setMounted] = React.useState(false)
   const [localValue, setLocalValue] = React.useState(value)
@@ -91,6 +93,7 @@ export function SearchBar({
         <Search className="h-4 w-4" />
       </div>
       <Input
+        ref={inputRef}
         type="text"
         value={localValue}
         onChange={handleInputChange}

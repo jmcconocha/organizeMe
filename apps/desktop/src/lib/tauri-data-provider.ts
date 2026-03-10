@@ -86,6 +86,22 @@ export const tauriDataProvider: DataProvider = {
     }
   },
 
+  getProjectNotes: async (projectId: string): Promise<string> => {
+    try {
+      return await invoke<string>("get_project_notes", { projectId })
+    } catch {
+      return ''
+    }
+  },
+
+  saveProjectNotes: async (projectId: string, notes: string): Promise<AppResult> => {
+    try {
+      return await invoke<AppResult>("save_project_notes", { projectId, notes })
+    } catch (err) {
+      return errorResult(errorMessage(err))
+    }
+  },
+
   getAppSettings: async (): Promise<AppSettings> => {
     try {
       return await invoke<AppSettings>("get_app_settings")

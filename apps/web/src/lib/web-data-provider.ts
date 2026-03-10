@@ -18,6 +18,8 @@ import {
   addProjectTag as addProjectTagAction,
   removeProjectTag as removeProjectTagAction,
   getAllTags as getAllTagsAction,
+  getProjectNotes as getProjectNotesAction,
+  saveProjectNotes as saveProjectNotesAction,
   getAppSettings as getAppSettingsAction,
   updateAppSettings as updateAppSettingsAction,
   browseForFolder as browseForFolderAction,
@@ -54,6 +56,8 @@ export const webDataProvider: DataProvider = {
     }
   },
   getAllTags: getAllTagsAction,
+  getProjectNotes: getProjectNotesAction,
+  saveProjectNotes: saveProjectNotesAction,
   getAppSettings: getAppSettingsAction,
   updateAppSettings: async (updates: Partial<AppSettings>): Promise<AppSettings> => {
     return await updateAppSettingsAction(updates)

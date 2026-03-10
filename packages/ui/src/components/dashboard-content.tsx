@@ -30,6 +30,7 @@ import { useStatusFilters } from "@organizeme/shared/hooks/use-status-filters"
 import { usePagination } from "@organizeme/shared/hooks/use-pagination"
 import { useArchive } from "@organizeme/shared/hooks/use-archive"
 import { useDashboardSettings } from "@organizeme/shared/hooks/use-dashboard-settings"
+import { useKeyboardShortcuts } from "@organizeme/shared/hooks/use-keyboard-shortcuts"
 import { Button } from "../ui/button"
 import { Badge } from "../ui/badge"
 
@@ -159,6 +160,7 @@ export function DashboardContent({
   paginationRouter,
 }: DashboardContentProps) {
   const { navigate, refresh } = useNavigation()
+  const searchInputRef = React.useRef<HTMLInputElement>(null)
   const [currentSort, setCurrentSort] = React.useState<SortOption>("modified-newest")
   const [selectedTags, setSelectedTags] = React.useState<string[]>([])
   const [searchQuery, setSearchQuery] = React.useState<string>("")
@@ -166,6 +168,33 @@ export function DashboardContent({
   const { favorites, toggleFavorite } = useFavorites()
   const { archivedProjects, toggleArchive } = useArchive()
   const { settings, isLoaded, updateSettings } = useDashboardSettings()
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    shortcuts: [
+      {
+        key: "k",
+        metaKey: true,
+        description: "Focus search",
+        handler: () => searchInputRef.current?.focus(),
+      },
+      {
+        key: "/",
+        description: "Focus search",
+        handler: () => searchInputRef.current?.focus(),
+      },
+      {
+        key: "1",
+        description: "Switch to grid view",
+        handler: () => updateSettings({ defaultView: "grid" }),
+      },
+      {
+        key: "2",
+        description: "Switch to table view",
+        handler: () => updateSettings({ defaultView: "table" }),
+      },
+    ],
+  })
 
   // Use the status filters hook for localStorage persistence
   const {
@@ -472,7 +501,8 @@ export function DashboardContent({
               <SearchBar
                 value={searchQuery}
                 onChange={setSearchQuery}
-                placeholder="Search projects..."
+                placeholder="Search projects... (⌘K)"
+                inputRef={searchInputRef}
               />
 
               <TabsList>
