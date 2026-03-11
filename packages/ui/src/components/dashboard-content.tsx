@@ -285,11 +285,12 @@ export function DashboardContent({
     }
     const lowerQuery = searchQuery.toLowerCase()
     return projects.filter((project) => {
-      // Search in name, path, and description (case-insensitive)
+      // Search in name, path, description, and notes (case-insensitive)
       return (
         project.name.toLowerCase().includes(lowerQuery) ||
         project.path.toLowerCase().includes(lowerQuery) ||
-        (project.description?.toLowerCase().includes(lowerQuery) ?? false)
+        (project.description?.toLowerCase().includes(lowerQuery) ?? false) ||
+        (project.notes?.toLowerCase().includes(lowerQuery) ?? false)
       )
     })
   }, [projects, searchQuery])

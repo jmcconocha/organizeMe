@@ -78,7 +78,7 @@
             "feature-7",
             "feature-8"
           ],
-          "status": "planned"
+          "status": "completed"
         }
       ]
     },
@@ -363,7 +363,9 @@
       "impact": "medium",
       "phase_id": "phase-2",
       "dependencies": [],
-      "status": "under_review",
+      "status": "done",
+      "task_outcome": "completed",
+      "previous_status": "under_review",
       "acceptance_criteria": [
         "Notes text area on project detail page",
         "Auto-save notes as user types",

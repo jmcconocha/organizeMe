@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useTransition } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card"
+import { MarkdownRenderer } from "./markdown-renderer"
 
 export interface ProjectNotesSectionProps {
   projectId: string
@@ -38,6 +39,7 @@ export function ProjectNotesSection({
   const [savedNotes, setSavedNotes] = useState(initialNotes)
   const [isPending, startTransition] = useTransition()
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
+  const [mode, setMode] = useState<'edit' | 'preview'>(initialNotes ? 'preview' : 'edit')
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   const hasChanges = notes !== savedNotes
@@ -80,30 +82,58 @@ export function ProjectNotesSection({
               <NoteIcon className="h-5 w-5" />
               Notes
             </CardTitle>
-            <CardDescription>Personal notes about this project</CardDescription>
+            <CardDescription>Personal notes about this project (supports Markdown)</CardDescription>
           </div>
-          <div className="text-xs text-muted-foreground">
-            {saveStatus === 'saving' && (
-              <span className="text-amber-600 dark:text-amber-400">Saving...</span>
-            )}
-            {saveStatus === 'saved' && (
-              <span className="text-green-600 dark:text-green-400">Saved</span>
-            )}
-            {saveStatus === 'idle' && hasChanges && (
-              <span className="text-muted-foreground">Unsaved changes</span>
-            )}
+          <div className="flex items-center gap-3">
+            <div className="text-xs text-muted-foreground">
+              {saveStatus === 'saving' && (
+                <span className="text-amber-600 dark:text-amber-400">Saving...</span>
+              )}
+              {saveStatus === 'saved' && (
+                <span className="text-green-600 dark:text-green-400">Saved</span>
+              )}
+              {saveStatus === 'idle' && hasChanges && (
+                <span className="text-muted-foreground">Unsaved changes</span>
+              )}
+            </div>
+            <div className="flex rounded-md border border-input overflow-hidden text-xs">
+              <button
+                type="button"
+                onClick={() => setMode('edit')}
+                className={`px-2 py-1 transition-colors ${mode === 'edit' ? 'bg-primary text-primary-foreground' : 'bg-background hover:bg-muted'}`}
+              >
+                Edit
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode('preview')}
+                className={`px-2 py-1 transition-colors ${mode === 'preview' ? 'bg-primary text-primary-foreground' : 'bg-background hover:bg-muted'}`}
+              >
+                Preview
+              </button>
+            </div>
           </div>
         </div>
       </CardHeader>
       <CardContent>
-        <textarea
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder="Add notes about this project..."
-          disabled={isPending}
-          className="w-full min-h-[120px] rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-y"
-          rows={5}
-        />
+        {mode === 'edit' ? (
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Add notes about this project... (Markdown supported)"
+            disabled={isPending}
+            className="w-full min-h-[120px] rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-y font-mono"
+            rows={5}
+          />
+        ) : (
+          <div className="min-h-[120px] rounded-md border border-input bg-background px-3 py-2">
+            {notes.trim() ? (
+              <MarkdownRenderer content={notes} className="prose-sm" />
+            ) : (
+              <p className="text-sm text-muted-foreground italic">No notes yet. Switch to Edit to add some.</p>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   )
