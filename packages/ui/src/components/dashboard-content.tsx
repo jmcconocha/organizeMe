@@ -48,6 +48,12 @@ export interface DashboardContentProps {
   onRefresh: () => Promise<RefreshResult>
   /** Router adapter for pagination URL synchronization */
   paginationRouter?: PaginationRouter
+  /** Whether data was loaded from cache */
+  fromCache?: boolean
+  /** Age of cached data in milliseconds */
+  cacheAgeMs?: number | null
+  /** Number of projects that failed to scan */
+  scanErrors?: number
 }
 
 /**
@@ -153,11 +159,24 @@ function ArchiveIcon({ className }: { className?: string }) {
  * Displays the project grid/table with view switching, refresh button,
  * and status summary cards.
  */
+/**
+ * Formats a cache age in milliseconds to a human-readable string.
+ */
+function formatCacheAge(ms: number): string {
+  const seconds = Math.floor(ms / 1000)
+  if (seconds < 60) return "just now"
+  const minutes = Math.floor(seconds / 60)
+  return minutes === 1 ? "1 min ago" : `${minutes} min ago`
+}
+
 export function DashboardContent({
   projects,
   statusSummary,
   onRefresh,
   paginationRouter,
+  fromCache,
+  cacheAgeMs,
+  scanErrors,
 }: DashboardContentProps) {
   const { navigate, refresh } = useNavigation()
   const searchInputRef = React.useRef<HTMLInputElement>(null)
@@ -414,6 +433,26 @@ export function DashboardContent({
 
   return (
     <div className="space-y-6">
+      {/* Scan Errors Banner */}
+      {scanErrors != null && scanErrors > 0 && (
+        <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/50 px-4 py-3">
+          <span className="text-amber-600 dark:text-amber-400 text-sm font-medium">
+            {scanErrors} project{scanErrors > 1 ? "s" : ""} failed to scan.
+          </span>
+          <span className="text-amber-600/80 dark:text-amber-400/80 text-sm">
+            Some projects may be missing from the list. Try refreshing.
+          </span>
+        </div>
+      )}
+
+      {/* Cache Indicator */}
+      {fromCache && cacheAgeMs != null && (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span className="inline-block h-2 w-2 rounded-full bg-blue-400" />
+          Showing cached data from {formatCacheAge(cacheAgeMs)}
+        </div>
+      )}
+
       {/* Status Summary Cards */}
       <section aria-labelledby="status-summary-heading">
         <h2 id="status-summary-heading" className="sr-only">

@@ -6,8 +6,9 @@
  */
 
 import { Suspense } from "react"
-import { scanProjects, filterSuccessfulScans } from "@/lib/project-scanner"
+import { scanProjects, filterSuccessfulScans, filterScanErrors } from "@/lib/project-scanner"
 import { enrichProjectsWithGitInfo } from "@/lib/git-utils"
+import { getCachedProjects, setCachedProjects, getCacheAge } from "@/lib/project-cache"
 import type { Project, ProjectStatus } from "@organizeme/shared/types/project"
 import { DashboardWrapper } from "./dashboard-wrapper"
 import { DashboardSkeleton } from "@organizeme/ui/components/dashboard-skeleton"
@@ -18,22 +19,45 @@ import { Header } from "@organizeme/ui/components/header"
  */
 async function getProjects(): Promise<{
   projects: Project[]
+  fromCache: boolean
+  cacheAgeMs: number | null
+  scanErrors: number
   error?: string
 }> {
+  // Try cache first
+  const cached = getCachedProjects()
+  if (cached) {
+    return {
+      projects: cached,
+      fromCache: true,
+      cacheAgeMs: getCacheAge(),
+      scanErrors: 0,
+    }
+  }
+
   try {
     // Scan the projects directory
     const scanResults = await scanProjects()
 
-    // Get successfully scanned projects
+    // Get successfully scanned projects and errors
     const projects = filterSuccessfulScans(scanResults)
+    const errors = filterScanErrors(scanResults)
 
     // Enrich projects with Git information
     const enrichedProjects = await enrichProjectsWithGitInfo(projects)
 
-    return { projects: enrichedProjects }
+    // Cache the results
+    setCachedProjects(enrichedProjects)
+
+    return {
+      projects: enrichedProjects,
+      fromCache: false,
+      cacheAgeMs: null,
+      scanErrors: errors.length,
+    }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error"
-    return { projects: [], error: errorMessage }
+    return { projects: [], fromCache: false, cacheAgeMs: null, scanErrors: 0, error: errorMessage }
   }
 }
 
@@ -88,7 +112,7 @@ export default async function DashboardPage() {
  * Wrapped in Suspense for streaming.
  */
 async function ProjectsLoader() {
-  const { projects, error } = await getProjects()
+  const { projects, fromCache, cacheAgeMs, scanErrors, error } = await getProjects()
   const statusSummary = getStatusSummary(projects)
 
   if (error) {
@@ -100,13 +124,22 @@ async function ProjectsLoader() {
         <h2 className="text-xl font-semibold mb-2">Failed to Load Projects</h2>
         <p className="text-muted-foreground max-w-md mb-4">{error}</p>
         <p className="text-sm text-muted-foreground">
-          Make sure the PROJECTS_PATH environment variable is set correctly.
+          Make sure the PROJECTS_PATH environment variable is set correctly, or
+          try refreshing the page.
         </p>
       </div>
     )
   }
 
-  return <DashboardWrapper projects={projects} statusSummary={statusSummary} />
+  return (
+    <DashboardWrapper
+      projects={projects}
+      statusSummary={statusSummary}
+      fromCache={fromCache}
+      cacheAgeMs={cacheAgeMs}
+      scanErrors={scanErrors}
+    />
+  )
 }
 
 /**

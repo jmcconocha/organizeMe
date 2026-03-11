@@ -49,6 +49,10 @@ export interface RefreshResult {
  */
 export async function refreshProjects(): Promise<RefreshResult> {
   try {
+    // Invalidate cache to force fresh scan
+    const { invalidateCache } = await import('./project-cache')
+    invalidateCache()
+
     // Scan the projects directory
     const results = await scanProjects()
 
