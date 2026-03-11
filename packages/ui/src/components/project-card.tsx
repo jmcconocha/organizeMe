@@ -254,6 +254,14 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
                     ))}
                   </div>
                 )}
+                {project.notes && (
+                  <p className={cn(
+                    "text-muted-foreground line-clamp-2 italic",
+                    density === "compact" ? "mt-1 text-[10px]" : density === "spacious" ? "mt-3 text-sm" : "mt-2 text-xs"
+                  )}>
+                    {project.notes}
+                  </p>
+                )}
               </CardContent>
               <CardFooter className={cn(densityClasses.footer[density], "flex items-center justify-between text-muted-foreground")}>
                 <span title={new Date(project.lastModified).toLocaleString()}>
@@ -352,6 +360,11 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
                   <CardDescription className={cn("truncate max-w-[300px]", densityClasses.description[density])}>
                     {project.description}
                   </CardDescription>
+                )}
+                {project.notes && (
+                  <p className={cn("truncate max-w-[300px] text-muted-foreground italic", densityClasses.description[density])}>
+                    {project.notes}
+                  </p>
                 )}
               </CardHeader>
               <div className={cn(
