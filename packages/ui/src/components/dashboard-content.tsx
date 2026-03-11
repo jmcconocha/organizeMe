@@ -33,6 +33,10 @@ import { useDashboardSettings } from "@organizeme/shared/hooks/use-dashboard-set
 import { useKeyboardShortcuts } from "@organizeme/shared/hooks/use-keyboard-shortcuts"
 import { Button } from "../ui/button"
 import { Badge } from "../ui/badge"
+import { RecentProjectsWidget } from "./recent-projects-widget"
+import { NotificationBell } from "./notification-bell"
+import { useRecentProjects } from "@organizeme/shared/hooks/use-recent-projects"
+import { useNotifications } from "@organizeme/shared/hooks/use-notifications"
 
 /**
  * Status summary type containing counts for each status and total.
@@ -187,6 +191,8 @@ export function DashboardContent({
   const { favorites, toggleFavorite } = useFavorites()
   const { archivedProjects, toggleArchive } = useArchive()
   const { settings, isLoaded, updateSettings } = useDashboardSettings()
+  const { recentProjects, clearRecentProjects } = useRecentProjects()
+  const { checkForChanges } = useNotifications()
 
   // Keyboard shortcuts
   useKeyboardShortcuts({
@@ -227,6 +233,12 @@ export function DashboardContent({
     () => Array.from(selectedStatusesSet),
     [selectedStatusesSet]
   )
+
+  // Check for status changes on initial load
+  React.useEffect(() => {
+    const projectsForCheck = projects.map((p) => ({ id: p.id, name: p.name, status: p.status }))
+    checkForChanges(projectsForCheck)
+  }, [projects, checkForChanges])
 
   const handleRefreshComplete = React.useCallback(() => {
     // Refresh the page to get updated data
@@ -454,6 +466,13 @@ export function DashboardContent({
         </div>
       )}
 
+      {/* Recent Projects */}
+      <RecentProjectsWidget
+        recentProjects={recentProjects}
+        projects={projects}
+        onClear={clearRecentProjects}
+      />
+
       {/* Status Summary Cards */}
       <section aria-labelledby="status-summary-heading">
         <h2 id="status-summary-heading" className="sr-only">
@@ -597,6 +616,8 @@ export function DashboardContent({
                 currentSort={currentSort}
                 onSortChange={setCurrentSort}
               />
+
+              <NotificationBell />
 
               <DashboardSettingsDialog />
 
