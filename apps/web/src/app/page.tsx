@@ -6,7 +6,8 @@
  */
 
 import { Suspense } from "react"
-import { scanProjects, filterSuccessfulScans, filterScanErrors } from "@/lib/project-scanner"
+import { scanProjects, filterSuccessfulScans, filterScanErrors, type ProjectScanError } from "@/lib/project-scanner"
+import { basename } from "path"
 import { enrichProjectsWithGitInfo } from "@/lib/git-utils"
 import { getCachedProjects, setCachedProjects, getCacheAge } from "@/lib/project-cache"
 import { loadProjectNotes } from "@/lib/note-storage"
@@ -53,6 +54,23 @@ async function getProjects(): Promise<{
     // Enrich projects with Git information
     const enrichedProjects = await enrichProjectsWithGitInfo(projects)
 
+    // Log scan errors for debugging
+    for (const err of errors) {
+      console.error(`[OrganizeMe] Scan error for ${err.path}: ${err.error}`)
+    }
+
+    // Convert scan errors to error-state projects for display
+    const errorProjects: Project[] = errors.map((err) => ({
+      id: basename(err.path),
+      name: basename(err.path),
+      path: err.path,
+      status: 'unknown' as const,
+      lastModified: new Date(),
+      hasPackageJson: false,
+      hasReadme: false,
+      scanError: err.error,
+    }))
+
     // Attach notes to projects
     const allNotes = await loadProjectNotes()
     const projectsWithNotes = enrichedProjects.map((p) => ({
@@ -60,11 +78,14 @@ async function getProjects(): Promise<{
       notes: allNotes[p.id] || undefined,
     }))
 
-    // Cache the results
+    // Combine successful and error projects
+    const allProjects = [...projectsWithNotes, ...errorProjects]
+
+    // Cache only successful projects
     setCachedProjects(projectsWithNotes)
 
     return {
-      projects: projectsWithNotes,
+      projects: allProjects,
       fromCache: false,
       cacheAgeMs: null,
       scanErrors: errors.length,

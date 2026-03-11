@@ -239,6 +239,7 @@ export async function scanDirectory(
   try {
     const stats = await stat(projectsPath)
     if (!stats.isDirectory()) {
+      console.error(`[OrganizeMe] Projects path is not a directory: ${projectsPath}`)
       return [{
         error: `Path is not a directory: ${projectsPath}`,
         path: projectsPath,
@@ -246,6 +247,7 @@ export async function scanDirectory(
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    console.error(`[OrganizeMe] Cannot access projects directory: ${errorMessage}`)
     return [{
       error: `Cannot access directory: ${errorMessage}`,
       path: projectsPath,
@@ -258,6 +260,7 @@ export async function scanDirectory(
     entries = await readdir(projectsPath, { withFileTypes: true })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    console.error(`[OrganizeMe] Failed to read projects directory: ${errorMessage}`)
     return [{
       error: `Failed to read directory: ${errorMessage}`,
       path: projectsPath,
@@ -292,6 +295,7 @@ export async function scanDirectory(
         return { project }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+        console.error(`[OrganizeMe] Failed to scan project at ${fullPath}: ${errorMessage}`)
         return {
           error: `Failed to scan project: ${errorMessage}`,
           path: fullPath,

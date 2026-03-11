@@ -183,6 +183,44 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
       },
     }
 
+    // Error state card
+    if (project.scanError) {
+      return (
+        <Card
+          ref={ref}
+          className={cn(
+            projectCardVariants({ viewMode, density }),
+            "border-destructive/50 bg-destructive/5 dark:bg-destructive/10",
+            className
+          )}
+          {...props}
+        >
+          <CardHeader className={densityClasses.header[density]}>
+            <div className="flex items-start justify-between gap-2">
+              <CardTitle
+                className={cn(densityClasses.title[density], "truncate text-destructive")}
+                title={project.name}
+              >
+                {project.name}
+              </CardTitle>
+              <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">
+                Error
+              </span>
+            </div>
+          </CardHeader>
+          <CardContent className={cn(densityClasses.content[density], "flex-1")}>
+            <p className="text-sm text-destructive/80">{project.scanError}</p>
+            <p className="text-xs text-muted-foreground mt-2">
+              {project.path}
+            </p>
+          </CardContent>
+          <CardFooter className={cn(densityClasses.footer[density], "text-muted-foreground")}>
+            <span className="text-xs">Use the Refresh button to retry scanning</span>
+          </CardFooter>
+        </Card>
+      )
+    }
+
     return (
       <Link href={`/projects/${encodeURIComponent(project.id)}`} className="block">
         <Card
