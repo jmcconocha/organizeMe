@@ -49,6 +49,10 @@ export interface RefreshResult {
  */
 export async function refreshProjects(): Promise<RefreshResult> {
   try {
+    // Invalidate cache to force fresh scan
+    const { invalidateCache } = await import('./project-cache')
+    invalidateCache()
+
     // Scan the projects directory
     const results = await scanProjects()
 
@@ -511,6 +515,40 @@ export async function removeProjectTag(
 export async function getAllTags(): Promise<string[]> {
   const { getAllTags: getAllTagsFromStorage } = await import('./tag-storage')
   return getAllTagsFromStorage()
+}
+
+/**
+ * Gets notes for a project.
+ */
+export async function getProjectNotes(projectId: string): Promise<string> {
+  const { getProjectNotes: getNotes } = await import('./note-storage')
+  return getNotes(projectId)
+}
+
+/**
+ * Saves notes for a project. Returns success/failure result.
+ */
+export async function saveProjectNotes(
+  projectId: string,
+  notes: string
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const { saveProjectNotes: saveNotes } = await import('./note-storage')
+    await saveNotes(projectId, notes)
+
+    revalidatePath(`/projects/${projectId}`)
+
+    return {
+      success: true,
+      message: 'Notes saved',
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    return {
+      success: false,
+      message: `Failed to save notes: ${errorMessage}`,
+    }
+  }
 }
 
 /**

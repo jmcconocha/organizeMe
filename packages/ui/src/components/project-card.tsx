@@ -183,6 +183,44 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
       },
     }
 
+    // Error state card
+    if (project.scanError) {
+      return (
+        <Card
+          ref={ref}
+          className={cn(
+            projectCardVariants({ viewMode, density }),
+            "border-destructive/50 bg-destructive/5 dark:bg-destructive/10",
+            className
+          )}
+          {...props}
+        >
+          <CardHeader className={densityClasses.header[density]}>
+            <div className="flex items-start justify-between gap-2">
+              <CardTitle
+                className={cn(densityClasses.title[density], "truncate text-destructive")}
+                title={project.name}
+              >
+                {project.name}
+              </CardTitle>
+              <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">
+                Error
+              </span>
+            </div>
+          </CardHeader>
+          <CardContent className={cn(densityClasses.content[density], "flex-1")}>
+            <p className="text-sm text-destructive/80">{project.scanError}</p>
+            <p className="text-xs text-muted-foreground mt-2">
+              {project.path}
+            </p>
+          </CardContent>
+          <CardFooter className={cn(densityClasses.footer[density], "text-muted-foreground")}>
+            <span className="text-xs">Use the Refresh button to retry scanning</span>
+          </CardFooter>
+        </Card>
+      )
+    }
+
     return (
       <Link href={`/projects/${encodeURIComponent(project.id)}`} className="block">
         <Card
@@ -253,6 +291,14 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
                       </Badge>
                     ))}
                   </div>
+                )}
+                {project.notes && (
+                  <p className={cn(
+                    "text-muted-foreground line-clamp-2 italic",
+                    density === "compact" ? "mt-1 text-[10px]" : density === "spacious" ? "mt-3 text-sm" : "mt-2 text-xs"
+                  )}>
+                    {project.notes}
+                  </p>
                 )}
               </CardContent>
               <CardFooter className={cn(densityClasses.footer[density], "flex items-center justify-between text-muted-foreground")}>
@@ -352,6 +398,11 @@ const ProjectCard = React.forwardRef<HTMLDivElement, ProjectCardProps>(
                   <CardDescription className={cn("truncate max-w-[300px]", densityClasses.description[density])}>
                     {project.description}
                   </CardDescription>
+                )}
+                {project.notes && (
+                  <p className={cn("truncate max-w-[300px] text-muted-foreground italic", densityClasses.description[density])}>
+                    {project.notes}
+                  </p>
                 )}
               </CardHeader>
               <div className={cn(

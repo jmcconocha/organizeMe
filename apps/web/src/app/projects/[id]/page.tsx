@@ -10,7 +10,7 @@
 import { Suspense } from "react"
 import { notFound } from "next/navigation"
 
-import { scanProjects, filterSuccessfulScans, getReadmeContent } from "@/lib/project-scanner"
+import { scanProjects, filterSuccessfulScans, filterScanErrors, getReadmeContent } from "@/lib/project-scanner"
 import { Header } from "@organizeme/ui/components/header"
 import { getGitStatus, determineProjectStatus, getGitRemoteUrl } from "@/lib/git-utils"
 import type { Project } from "@organizeme/shared/types/project"
@@ -20,7 +20,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@orga
 import { ProjectDetailActions } from "./project-detail-actions"
 import { MarkdownRenderer } from "@organizeme/ui/components/markdown-renderer"
 import { ProjectTagsWrapper } from "./project-tags-wrapper"
+import { ProjectNotesWrapper } from "./project-notes-wrapper"
 import { getAllTags } from "@/lib/tag-storage"
+import { getProjectNotes } from "@/lib/note-storage"
 
 interface ProjectDetailPageProps {
   params: Promise<{ id: string }>
@@ -28,17 +30,39 @@ interface ProjectDetailPageProps {
 
 /**
  * Fetches a single project by ID with Git information, README content, and remote URL.
+ * Returns the project or an error-state project with scanError set.
  */
 async function getProject(id: string): Promise<Project | null> {
   try {
     // Scan all projects to find the matching one
     const scanResults = await scanProjects()
     const projects = filterSuccessfulScans(scanResults)
+    const errors = filterScanErrors(scanResults)
 
     // Find the project by ID
     const project = projects.find((p) => p.id === id)
 
     if (!project) {
+      // Check if this project had a scan error
+      const scanError = errors.find((e) => {
+        const dirName = e.path.split('/').pop()
+        return dirName === id
+      })
+
+      if (scanError) {
+        console.error(`[OrganizeMe] Scan error for project ${id}: ${scanError.error}`)
+        return {
+          id,
+          name: id,
+          path: scanError.path,
+          status: 'unknown',
+          lastModified: new Date(),
+          hasPackageJson: false,
+          hasReadme: false,
+          scanError: scanError.error,
+        }
+      }
+
       return null
     }
 
@@ -61,7 +85,9 @@ async function getProject(id: string): Promise<Project | null> {
     project.gitRemoteUrl = remoteUrlResult.url
 
     return project
-  } catch {
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    console.error(`[OrganizeMe] Error loading project ${id}: ${errorMessage}`)
     return null
   }
 }
@@ -180,8 +206,56 @@ async function ProjectDetailContent({ id }: { id: string }) {
     notFound()
   }
 
-  // Get all available tags for autocomplete
-  const allTags = await getAllTags()
+  // Show error state for projects that failed to scan
+  if (project.scanError) {
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-bold tracking-tight text-destructive">{project.name}</h1>
+              <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-3 py-1 text-sm font-medium text-destructive">
+                Scan Error
+              </span>
+            </div>
+          </div>
+        </div>
+        <Separator />
+        <Card className="border-destructive/50">
+          <CardHeader>
+            <CardTitle className="text-destructive">Scan Failed</CardTitle>
+            <CardDescription>This project could not be scanned</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <dt className="text-sm font-medium text-muted-foreground">Error</dt>
+              <dd className="mt-1 text-sm text-destructive font-mono bg-destructive/5 px-3 py-2 rounded">
+                {project.scanError}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sm font-medium text-muted-foreground">Path</dt>
+              <dd className="mt-1 text-sm font-mono bg-muted px-2 py-1 rounded break-all">
+                {project.path}
+              </dd>
+            </div>
+            <div className="pt-2">
+              <p className="text-sm text-muted-foreground">
+                Try refreshing from the dashboard to retry scanning this project. Common causes include
+                permission issues, missing directories, or corrupted files.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Get all available tags and project notes in parallel
+  const [allTags, projectNotes] = await Promise.all([
+    getAllTags(),
+    getProjectNotes(project.id),
+  ])
 
   return (
     <div className="space-y-6">
@@ -343,6 +417,12 @@ async function ProjectDetailContent({ id }: { id: string }) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Project Notes */}
+      <ProjectNotesWrapper
+        projectId={project.id}
+        initialNotes={projectNotes}
+      />
 
       {/* README Content */}
       {project.readmeContent && (

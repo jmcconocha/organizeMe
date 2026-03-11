@@ -66,6 +66,10 @@ export interface Project {
   gitRemoteUrl?: string | null
   /** Array of tags for categorizing and organizing projects */
   tags?: string[]
+  /** User's personal notes about this project */
+  notes?: string
+  /** Error message if the project failed to scan */
+  scanError?: string
 }
 
 /**

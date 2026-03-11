@@ -6,8 +6,11 @@
  */
 
 import { Suspense } from "react"
-import { scanProjects, filterSuccessfulScans } from "@/lib/project-scanner"
+import { scanProjects, filterSuccessfulScans, filterScanErrors, type ProjectScanError } from "@/lib/project-scanner"
+import { basename } from "path"
 import { enrichProjectsWithGitInfo } from "@/lib/git-utils"
+import { getCachedProjects, setCachedProjects, getCacheAge } from "@/lib/project-cache"
+import { loadProjectNotes } from "@/lib/note-storage"
 import type { Project, ProjectStatus } from "@organizeme/shared/types/project"
 import { DashboardWrapper } from "./dashboard-wrapper"
 import { DashboardSkeleton } from "@organizeme/ui/components/dashboard-skeleton"
@@ -18,22 +21,78 @@ import { Header } from "@organizeme/ui/components/header"
  */
 async function getProjects(): Promise<{
   projects: Project[]
+  fromCache: boolean
+  cacheAgeMs: number | null
+  scanErrors: number
   error?: string
 }> {
+  // Try cache first
+  const cached = getCachedProjects()
+  if (cached) {
+    // Refresh notes from disk even when using cached projects
+    const allNotes = await loadProjectNotes()
+    const projectsWithNotes = cached.map((p) => ({
+      ...p,
+      notes: allNotes[p.id] || undefined,
+    }))
+    return {
+      projects: projectsWithNotes,
+      fromCache: true,
+      cacheAgeMs: getCacheAge(),
+      scanErrors: 0,
+    }
+  }
+
   try {
     // Scan the projects directory
     const scanResults = await scanProjects()
 
-    // Get successfully scanned projects
+    // Get successfully scanned projects and errors
     const projects = filterSuccessfulScans(scanResults)
+    const errors = filterScanErrors(scanResults)
 
     // Enrich projects with Git information
     const enrichedProjects = await enrichProjectsWithGitInfo(projects)
 
-    return { projects: enrichedProjects }
+    // Log scan errors for debugging
+    for (const err of errors) {
+      console.error(`[OrganizeMe] Scan error for ${err.path}: ${err.error}`)
+    }
+
+    // Convert scan errors to error-state projects for display
+    const errorProjects: Project[] = errors.map((err) => ({
+      id: basename(err.path),
+      name: basename(err.path),
+      path: err.path,
+      status: 'unknown' as const,
+      lastModified: new Date(),
+      hasPackageJson: false,
+      hasReadme: false,
+      scanError: err.error,
+    }))
+
+    // Attach notes to projects
+    const allNotes = await loadProjectNotes()
+    const projectsWithNotes = enrichedProjects.map((p) => ({
+      ...p,
+      notes: allNotes[p.id] || undefined,
+    }))
+
+    // Combine successful and error projects
+    const allProjects = [...projectsWithNotes, ...errorProjects]
+
+    // Cache only successful projects
+    setCachedProjects(projectsWithNotes)
+
+    return {
+      projects: allProjects,
+      fromCache: false,
+      cacheAgeMs: null,
+      scanErrors: errors.length,
+    }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error"
-    return { projects: [], error: errorMessage }
+    return { projects: [], fromCache: false, cacheAgeMs: null, scanErrors: 0, error: errorMessage }
   }
 }
 
@@ -88,7 +147,7 @@ export default async function DashboardPage() {
  * Wrapped in Suspense for streaming.
  */
 async function ProjectsLoader() {
-  const { projects, error } = await getProjects()
+  const { projects, fromCache, cacheAgeMs, scanErrors, error } = await getProjects()
   const statusSummary = getStatusSummary(projects)
 
   if (error) {
@@ -100,13 +159,22 @@ async function ProjectsLoader() {
         <h2 className="text-xl font-semibold mb-2">Failed to Load Projects</h2>
         <p className="text-muted-foreground max-w-md mb-4">{error}</p>
         <p className="text-sm text-muted-foreground">
-          Make sure the PROJECTS_PATH environment variable is set correctly.
+          Make sure the PROJECTS_PATH environment variable is set correctly, or
+          try refreshing the page.
         </p>
       </div>
     )
   }
 
-  return <DashboardWrapper projects={projects} statusSummary={statusSummary} />
+  return (
+    <DashboardWrapper
+      projects={projects}
+      statusSummary={statusSummary}
+      fromCache={fromCache}
+      cacheAgeMs={cacheAgeMs}
+      scanErrors={scanErrors}
+    />
+  )
 }
 
 /**
