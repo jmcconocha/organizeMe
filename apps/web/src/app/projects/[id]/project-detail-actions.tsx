@@ -15,6 +15,7 @@ import * as React from "react"
 
 import { useDataProvider } from "@organizeme/shared/context/data-provider-context"
 import { useNavigation } from "@organizeme/shared/context/navigation-context"
+import { trackProjectView } from "@organizeme/shared/lib/recent-projects"
 import { Button } from "@organizeme/ui/ui/button"
 
 export interface ProjectDetailActionsProps {
@@ -157,6 +158,11 @@ export function ProjectDetailActions({
   const [isOpeningGitHub, setIsOpeningGitHub] = React.useState(false)
   const [isRefreshing, setIsRefreshing] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
+
+  // Track this project view on mount
+  React.useEffect(() => {
+    trackProjectView(projectId)
+  }, [projectId])
 
   const handleOpenInFinder = React.useCallback(async () => {
     setIsOpening(true)
