@@ -9,6 +9,7 @@ import { Suspense } from "react"
 import { scanProjects, filterSuccessfulScans, filterScanErrors } from "@/lib/project-scanner"
 import { enrichProjectsWithGitInfo } from "@/lib/git-utils"
 import { getCachedProjects, setCachedProjects, getCacheAge } from "@/lib/project-cache"
+import { loadProjectNotes } from "@/lib/note-storage"
 import type { Project, ProjectStatus } from "@organizeme/shared/types/project"
 import { DashboardWrapper } from "./dashboard-wrapper"
 import { DashboardSkeleton } from "@organizeme/ui/components/dashboard-skeleton"
@@ -27,8 +28,14 @@ async function getProjects(): Promise<{
   // Try cache first
   const cached = getCachedProjects()
   if (cached) {
+    // Refresh notes from disk even when using cached projects
+    const allNotes = await loadProjectNotes()
+    const projectsWithNotes = cached.map((p) => ({
+      ...p,
+      notes: allNotes[p.id] || undefined,
+    }))
     return {
-      projects: cached,
+      projects: projectsWithNotes,
       fromCache: true,
       cacheAgeMs: getCacheAge(),
       scanErrors: 0,
@@ -46,11 +53,18 @@ async function getProjects(): Promise<{
     // Enrich projects with Git information
     const enrichedProjects = await enrichProjectsWithGitInfo(projects)
 
+    // Attach notes to projects
+    const allNotes = await loadProjectNotes()
+    const projectsWithNotes = enrichedProjects.map((p) => ({
+      ...p,
+      notes: allNotes[p.id] || undefined,
+    }))
+
     // Cache the results
-    setCachedProjects(enrichedProjects)
+    setCachedProjects(projectsWithNotes)
 
     return {
-      projects: enrichedProjects,
+      projects: projectsWithNotes,
       fromCache: false,
       cacheAgeMs: null,
       scanErrors: errors.length,
